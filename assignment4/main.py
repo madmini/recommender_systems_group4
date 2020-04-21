@@ -2,7 +2,7 @@ import pandas as pd
 from typing import List
 
 import movielens as ml
-from recommender import Recommender
+from assignment4.recommender import Recommender
 
 
 def ask_user_id(user_list: List[int]) -> int:
