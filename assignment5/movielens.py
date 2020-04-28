@@ -52,17 +52,29 @@ def load_movies() -> pd.DataFrame:
                        names=[movie_id, movie_title, movie_genres], index_col=movie_id)
 
 
-def load_ratings() -> pd.DataFrame:
+def load_ratings(include_timestamps: bool = False) -> pd.DataFrame:
     # this method is faster than the more obvious alternatives
     #   assign single ':' as the separator, then ignore odd columns with usecols=<even numbers>
     #   this utilizes the c based scanning engine which faster by an order of magnitude
     #   this is not applicable for the movies file, as its title column contains colons
     # using ansi (Windows CP-1252) encoding
-    df: pd.DataFrame = pd.read_csv('ml-1m/ratings.dat', sep=':', encoding='ansi',
-                                   usecols=[0, 2, 4, 6], names=[user_id, movie_id, rating, rating_timestamp])
+
+    if include_timestamps:
+        usecols = [0, 2, 4, 6]
+        names = [user_id, movie_id, rating, rating_timestamp]
+    else:
+        usecols = [0, 2, 4]
+        names = [user_id, movie_id, rating]
+
+    df: pd.DataFrame = pd.read_csv('ml-1m/ratings.dat', sep=':', encoding='ansi', usecols=usecols, names=names)
 
     # use index to avoid duplicate/unnecessary indexing, as the datafiles already have primary keys
     # Note: read_csv has an option for this, however apparently uses unstable APIs when generating a multi-index
     df.set_index(keys=[user_id, movie_id], inplace=True)
 
     return df
+
+
+def load_ratings_series() -> pd.Series:
+    # since there is only one real column, squeeze the columns into a single series
+    return load_ratings().squeeze(axis='columns')
