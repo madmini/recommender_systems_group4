@@ -12,7 +12,7 @@
 {% if user_id != ''  %}
 <form id="recommend" action="/recommender/" method="post">
     {% csrf_token %}
-    <input name='user_id' type='hidden'value={{ user_id }}>
+    <input name='user_id' type='hidden' value={{ user_id }}>
     <input type="submit" value="Recommend movies">
 </form>
 {% endif %}
