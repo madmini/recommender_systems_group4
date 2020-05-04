@@ -1,4 +1,4 @@
-from os.path import join
+import os.path
 
 import pandas as pd
 from django.conf import settings
@@ -38,11 +38,20 @@ class recommender_helper:
     credits: pd.DataFrame
 
     def __init__(self):
-        self.metadata = pd.read_csv(join(settings.BASE_DIR, 'recommender', 'movies_metadata.csv.xz'), encoding='utf8',
-                                    infer_datetime_format=True)
-        self.ratings = pd.read_csv(join(settings.BASE_DIR, 'recommender', 'rating.csv'), encoding='utf8',
+        meta_path = os.path.join(settings.BASE_DIR, 'recommender', 'movies_metadata.csv')
+        if os.path.exists(meta_path + '.xz'):
+            self.metadata = pd.read_csv(meta_path + '.xz', encoding='utf8', infer_datetime_format=True)
+        else:
+            self.metadata = pd.read_csv(meta_path, encoding='utf8', infer_datetime_format=True)
+
+        self.ratings = pd.read_csv(os.path.join(settings.BASE_DIR, 'recommender', 'rating.csv'), encoding='utf8',
                                    usecols=[self.user_id_colname, self.movie_id_colname, self.rating_colname])
-        self.credits = pd.read_csv(join(settings.BASE_DIR, 'recommender', 'credits.csv.xz'), encoding='utf8')
+
+        credits_path = os.path.join(settings.BASE_DIR, 'recommender', 'credits.csv')
+        if os.path.exists(credits_path + '.xz'):
+            self.credits = pd.read_csv(credits_path + '.xz', encoding='utf8')
+        else:
+            self.credits = pd.read_csv(credits_path, encoding='utf8')
 
     def pretty_recommendations(self, movies):
         movies['genres'] = movies['genres'].apply(onlygenrenames)
