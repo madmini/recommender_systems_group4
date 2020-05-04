@@ -1,5 +1,8 @@
 import pandas as pd
 from . import recommender
+
+from django.conf import settings
+
 import json
 # the files are from ex. 2 the prepared metadata and the ratings_small (gave new names for easier acces in this task)
 # recommender is copied from assignment 3
@@ -27,9 +30,9 @@ class recommender_helper:
     metadata: pd.DataFrame
     credits: pd.DataFrame
     def __init__(self):
-        self.metadata=pd.read_csv(r'D:\Uni\recommender\Assignments\assignment6\recommender\movies_metadata.csv.xz', encoding='utf8', infer_datetime_format=True)
-        self.ratings=pd.read_csv(r'D:\Uni\recommender\Assignments\assignment6\recommender\rating.csv', encoding='utf8',usecols=[self.user_id_colname, self.movie_id_colname, self.rating_colname])
-        self.credits=pd.read_csv(r'D:\Uni\recommender\Assignments\assignment6\recommender\credits.csv.xz', encoding='utf8')
+        self.metadata=pd.read_csv(settings.DATAFILES_PATH+'movies_metadata.csv.xz', encoding='utf8', infer_datetime_format=True)
+        self.ratings=pd.read_csv(settings.DATAFILES_PATH+'rating.csv', encoding='utf8',usecols=[self.user_id_colname, self.movie_id_colname, self.rating_colname])
+        self.credits=pd.read_csv(settings.DATAFILES_PATH+'credits.csv.xz', encoding='utf8')
 
     def pretty_recommendations(self, movies):
         movies=movies[['id','title','genres','poster','tagline','overview','cast','crew']]
