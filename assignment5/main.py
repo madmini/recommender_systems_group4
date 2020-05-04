@@ -59,7 +59,7 @@ similarities = None
 # similarities = import_similarities()
 
 # split into training and test sets
-train, test, mask = split_data(ratings, mask=import_mask())
+train, test, mask = split_data(ratings)#, mask=import_mask())
 
 r = Recommender(train, ml.rating, ml.user_id, ml.movie_id, similarities)
 

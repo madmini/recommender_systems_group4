@@ -19,7 +19,7 @@ def timer(func):
 
 ratings_header = ['UserID', 'MovieID', 'Rating', 'Timestamp']
 
-ratings_path: str = 'ml-1m/ratings.dat'
+ratings_path: str = 'ml-1m/ratings.dat.xz'
 ratings_prep_path: str = 'ml-1m/ratings.prep.dat'
 
 

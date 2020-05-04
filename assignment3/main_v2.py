@@ -7,7 +7,7 @@ userHeader = ['UserId', 'Gender', 'Age', 'Occupation', 'ZipCode']  #
 neighbors_header = ['UserId', 'Distance']
 # Import the 3 Files with named columns (from the README)
 movieData = pd.read_csv('ml-1m/movies.dat', sep='::', engine='python', header=None, names=movieHeader)
-ratingsData = pd.read_csv('ml-1m/ratings.dat', sep='::', engine='python', header=None, names=ratingsHeader)
+ratingsData = pd.read_csv('ml-1m/ratings.dat.xz', sep='::', engine='python', header=None, names=ratingsHeader)
 userData = pd.read_csv('ml-1m/users.dat', sep='::', engine='python', header=None, names=userHeader)
 
 

@@ -20,7 +20,7 @@ user_zip_code = 'Zip-code'
 files = {
     # ratings.dat - UserID::MovieID::Rating::Timestamp
     'ratings': {
-        'path': 'ml-1m/ratings.dat',
+        'path': 'ml-1m/ratings.dat.xz',
         'header': [user_id, movie_id, rating, rating_timestamp],
         'index': [user_id, movie_id]
     },
@@ -66,7 +66,7 @@ def load_ratings(include_timestamps: bool = False) -> pd.DataFrame:
         usecols = [0, 2, 4]
         names = [user_id, movie_id, rating]
 
-    df: pd.DataFrame = pd.read_csv('ml-1m/ratings.dat', sep=':', encoding='ansi', usecols=usecols, names=names)
+    df: pd.DataFrame = pd.read_csv('ml-1m/ratings.dat.xz', sep=':', encoding='ansi', usecols=usecols, names=names)
 
     # use index to avoid duplicate/unnecessary indexing, as the datafiles already have primary keys
     # Note: read_csv has an option for this, however apparently uses unstable APIs when generating a multi-index

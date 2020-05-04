@@ -1,10 +1,10 @@
 import pandas as pd
 from typing import List
 
-from assignment3 import recommender
+import recommender
 
 # ratings.dat - UserID::MovieID::Rating::Timestamp
-ratings_path: str = 'ml-1m/ratings.dat'
+ratings_path: str = 'ml-1m/ratings.dat.xz'
 ratings_header = [recommender.user_id_colname, recommender.movie_id_colname, recommender.rating_colname, 'Timestamp']
 
 # users.dat   - UserID::Gender::Age::Occupation::Zip-code
