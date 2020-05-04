@@ -1,0 +1,18 @@
+<h1>SUPER RECOMMENDER</h1>
+<h2> Choose an User Id to get recommendations for:</h2>
+<br>
+<form id="check_user" action="/get_user_id" method="post">
+    {% csrf_token %}
+    <label for="user_id">Enter name: </label>
+    <input id="user_id" type="number" name="user_id" value={{ user_id }}>
+    <input type="submit" value="Check user">
+</form>
+{% if errormsg %} <h3> {{ errormsg }}</h3>
+<br> {% endif %}
+{% if user_id != ''  %}
+<form id="recommend" action="/recommender/" method="post">
+    {% csrf_token %}
+    <input name='user_id' type='hidden'value={{ user_id }}>
+    <input type="submit" value="Recommend movies">
+</form>
+{% endif %}
