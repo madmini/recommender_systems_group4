@@ -56,9 +56,11 @@ ROOT_URLCONF = 'assignment6.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [r'D:\Uni\recommender\Assignments\assignment6',
-                 r'D:\Uni\recommender\Assignments\assignment6\id_selector',
-                 r'D:\Uni\recommender\Assignments\assignment6\recommender'],
+        'DIRS': [
+            BASE_DIR,
+            os.path.join(BASE_DIR, 'id_selector'),
+            os.path.join(BASE_DIR, 'recommender')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

@@ -1,7 +1,7 @@
 import pandas as pd
 from . import recommender
-
 from django.conf import settings
+from os.path import join
 
 import json
 # the files are from ex. 2 the prepared metadata and the ratings_small (gave new names for easier acces in this task)
@@ -16,10 +16,13 @@ def onlydirectors(genres):
     genre_aslist=eval(genres)
     return [g['name'] for g in genre_aslist if g['department']=='Directing']
 
-def generate_picture_html(link_end):
-    html_string='<img src=\"'
-    url='https://image.tmdb.org/t/p/w600_and_h900_bestv2/'+link_end
-    html_string=html_string+url+'\" class="movie-picture">'
+def generate_picture_html(poster_path):
+
+    base_url = 'http://image.tmdb.org/t/p/'
+    file_size = 'w92'
+
+    url= base_url + file_size + poster_path
+    html_string = '<img src=\"' + url + '\" class="movie-picture">'
     return html_string
 
 class recommender_helper:
@@ -30,13 +33,13 @@ class recommender_helper:
     metadata: pd.DataFrame
     credits: pd.DataFrame
     def __init__(self):
-        self.metadata=pd.read_csv(settings.DATAFILES_PATH+'movies_metadata.csv.xz', encoding='utf8', infer_datetime_format=True)
-        self.ratings=pd.read_csv(settings.DATAFILES_PATH+'rating.csv', encoding='utf8',usecols=[self.user_id_colname, self.movie_id_colname, self.rating_colname])
-        self.credits=pd.read_csv(settings.DATAFILES_PATH+'credits.csv.xz', encoding='utf8')
+        self.metadata=pd.read_csv(join(settings.BASE_DIR, 'recommender', 'movies_metadata.csv.xz'), encoding='utf8', infer_datetime_format=True)
+        self.ratings=pd.read_csv(join(settings.BASE_DIR, 'recommender', 'rating.csv'), encoding='utf8',usecols=[self.user_id_colname, self.movie_id_colname, self.rating_colname])
+        self.credits=pd.read_csv(join(settings.BASE_DIR, 'recommender', 'credits.csv.xz'), encoding='utf8')
 
     def pretty_recommendations(self, movies):
-        movies=movies[['id','title','genres','poster','tagline','overview','cast','crew']]
         movies['genres']=movies['genres'].apply(onlygenrenames)
+        movies=movies[['id','title','genres','poster','tagline','overview','cast','crew']]
         return movies
     def get_recommendations(self, user_id):
         return recommender.recommend_movies(ratings=self.ratings, target_user_id=user_id,n_recommendations=20)
