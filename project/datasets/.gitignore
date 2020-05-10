@@ -1,0 +1,6 @@
+# datasets gitignore
+ml-*/*
+full_meta/**/*.json
+
+# exceptions
+!/**/README*
