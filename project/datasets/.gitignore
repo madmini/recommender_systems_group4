@@ -4,3 +4,4 @@ full_meta/**/*.json
 
 # exceptions
 !/**/README*
+!/**/PLACE_HERE*
