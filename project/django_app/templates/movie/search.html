@@ -1,0 +1,13 @@
+{% extends "movie/base.html" %}
+
+{% block content %}
+<form id="main_form" method="post" action="{% url 'search_post' %}">
+    {% csrf_token %}
+    <label>
+        Movie Name:
+        <input type="text" name="movie"/>
+    </label>
+
+    <button type="submit">Find similar movies</button>
+</form>
+{% endblock %}

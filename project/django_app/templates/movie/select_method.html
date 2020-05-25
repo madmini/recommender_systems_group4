@@ -1,0 +1,23 @@
+<label>
+    Method
+    <select form="main_form" name="method"
+            {% if conf.immediate_method_change %}
+                onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);"
+            {% endif %}
+    >
+
+        {% for method in methods %}
+        <option
+                {% if conf.immediate_method_change %}
+                    value="{% url 'display_similar' base_movie.id method.name %}"
+                {% endif %}
+
+                {% if method.name == current_method %}
+                    selected
+                {% endif %}
+        >{{ method.display_name }}
+        </option>
+        {% endfor %}
+
+    </select>
+</label>

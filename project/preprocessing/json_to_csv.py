@@ -69,7 +69,7 @@ for fn in files:
         movielensId = int(j['movielensId'])
 
         movie_meta[movielensId] = {
-            outer_key + '.' + inner_key: inner_val
+            ((outer_key + '_' + inner_key) if outer_key != 'movielens' else inner_key): inner_val
             for outer_key, outer_val in j.items()
             if outer_key != 'movielensId'
             for inner_key, inner_val in outer_val.items()

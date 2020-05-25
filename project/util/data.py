@@ -56,14 +56,14 @@ class File(Enum):
     # links.csv: movieId,imdbId,tmdbId
     links = ('links', [Column.movie_id.name, Column.imdb_id.name, Column.tmdb_id.name], None)
     movie_meta = ('movie_meta', None, 0, {
-        'tmdb.adult': 'boolean',
-        'tmdb.video': 'boolean',
-        'tmdb.budget': 'Int64',
-        'tmdb.revenue': 'Int64',
-        'tmdb.vote_count': 'Int16',
-        'movielens.imdbMovieId': 'str',
-        'movielens.releaseYear': 'Int16',
-        'movielens.runtime': 'Int16',
+        'tmdb_adult': 'boolean',
+        'tmdb_video': 'boolean',
+        'tmdb_budget': 'Int64',
+        'tmdb_revenue': 'Int64',
+        'tmdb_vote_count': 'Int16',
+        'imdbMovieId': 'str',
+        'releaseYear': 'Int16',
+        'runtime': 'Int16',
     })
 
     def __init__(self, filename: str, header: List[str], index: List[str], dtypes: Dict[str, str] = None):
@@ -138,12 +138,13 @@ class Data:
                     file = lookup_files[name]
                     cls.__file_paths[file] = os.path.join(cls.__ml_path, full_name)
 
-        print(cls.__ml_path)
+        # print("using " + str(cls.__ml_path))
 
         for name in os.listdir(meta_dataset_dir):
             if name.startswith('movie_meta.csv'):
                 cls.__file_paths[File.movie_meta] = os.path.join(meta_dataset_dir, name)
-                break
+                if not name.endswith(('.xz', '.gz', '.zip', '.bz2')):
+                    break
 
         if preload_files:
             cls.movies()
@@ -229,7 +230,7 @@ class Data:
 
     @classmethod
     @synchronized
-    def movie_meta(cls):
+    def movie_meta(cls) -> pd.DataFrame:
 
         if cls.__file_paths is None:
             cls.init()
@@ -243,8 +244,8 @@ class Data:
 
         if file not in cls.__cache:
             cls.__cache[file] = pd.read_csv(
-                path, index_col=0, engine='c', dtype=file.dtypes, parse_dates=['movielens.releaseDate'])
-            cls.__cache[file].rename_axis('movieId', inplace=True)
+                path, index_col=0, engine='c', dtype=file.dtypes, parse_dates=['releaseDate'])
+            # cls.__cache[file].rename_axis('movieId', inplace=True)
 
         return cls.__cache[file]
 

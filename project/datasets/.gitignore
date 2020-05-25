@@ -1,7 +1,15 @@
-# datasets gitignore
+## gitignore
+# datasets
 ml-*/*
+full_meta/*
+# .json base files
 full_meta/**/*.json
 
-# exceptions
-!/**/README*
+## exceptions
+# docs
+!/**/README_*
 !/**/PLACE_HERE*
+# small sample dataset
+ml-latest-small
+# .json base files compiled and filtered into .csv
+full_meta/movie_meta.csv.xz

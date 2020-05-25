@@ -1,8 +1,6 @@
 import csv
 import os
 
-
-
 json_folder_path = r'D:\miniGlump\RecommenderSystems\assets\extracted_content_ml-latest'
 movies_csv_paths = [
     r'D:\miniGlump\RecommenderSystems\assets\ml-20m',
