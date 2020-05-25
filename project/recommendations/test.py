@@ -2,11 +2,9 @@ from typing import List, Dict
 import pandas as pd
 from util.data import Data, Column
 
-
-
 def recommend_movies(movie_id: int, n: int) -> List[int]:
     ratings = Data.ratings()
-    ratings.reset_index(inplace=True)
+    ratings = ratings.reset_index()
     ratedUsers = ratings.loc[ratings['movie_id'] == movie_id][['user_id']]
     ratedUsersRating = ratedUsers.merge(ratings, left_on='user_id', right_on='user_id')
     ratedUsersRating = ratedUsersRating.drop(ratedUsersRating[ratedUsersRating['movie_id'] == movie_id].index)
