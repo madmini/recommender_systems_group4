@@ -32,9 +32,7 @@ def display_similar(request, movie_id: int, method: str = None):
 
     try:
         movie = get_movie_data(movie_id)
-        recommendations = recommend_movies(movie_id, 10, method_name=method)
-        print(method)
-        print(movie)
+        recommendations = recommend_movies(movie_id, 5, method_name=method)
 
     except MovieNotFoundException:
         raise Http404("We do not have data on a movie with ID %s." % movie_id)
