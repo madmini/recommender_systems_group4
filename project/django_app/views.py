@@ -2,6 +2,7 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 
 from recommendations.adapter import *
+from util.exception import MovieNotFoundException, MethodNotFoundException, MissingDataException
 
 
 def search(request):
@@ -31,13 +32,17 @@ def display_similar(request, movie_id: int, method: str = None):
             request.session['method'] = method
 
     try:
-        movie = get_movie_data(movie_id)
+        movie = get_movie_data(movie_id)[0]
         recommendations = recommend_movies(movie_id, 5, method_name=method)
 
     except MovieNotFoundException:
         raise Http404("We do not have data on a movie with ID %s." % movie_id)
+
     except MethodNotFoundException:
         raise Http404("There is no method %s." % method)
+
+    except MissingDataException as e:
+        raise Http404("Missing data: %s" % e.args[0])
 
     context = {
         'conf': {
@@ -57,9 +62,6 @@ def redirect_main(request):
 
 
 def search_post(request):
-
-    # print(request.POST)
-
     return redirect(
         'display_similar',
         movie_id=request.POST.get('movie'),

@@ -9,7 +9,9 @@
         {% for method in methods %}
         <option
                 {% if conf.immediate_method_change %}
-                    value="{% url 'display_similar' base_movie.id method.name %}"
+                    value="{% url 'display_similar' base_movie.movielens_id method.name %}"
+                {% else %}
+                    value="{{ method.name }}"
                 {% endif %}
 
                 {% if method.name == current_method %}

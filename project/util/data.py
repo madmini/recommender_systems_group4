@@ -17,54 +17,71 @@ meta_dataset_dir = os.path.join(dataset_dir, 'full_meta')
 
 
 class Column(Enum):
-    user_id = 'UserID'
-    movie_id = 'MovieID'
-    rating = 'Rating'
-    timestamp = 'Timestamp'
-    title = 'Title'
-    genres = 'Genres'
-    gender = 'Gender'
-    age = 'Age'
-    occupation = 'Occupation'
-    zip_code = 'Zip-code'
-    imdb_id = 'imdbId'
-    tmdb_id = 'tmdbId'
+    user_id = 'user_id'
+    movie_id = 'movie_id'
+    rating = 'rating'
+    timestamp = 'timestamp'
+    title = 'title'
+    genres = 'genres'
+    gender = 'gender'
+    age = 'age'
+    occupation = 'occupation'
+    zip_code = 'zip_code'
+    imdb_id = 'imdb_id'
+    tmdb_id = 'tmdb_id'
     tag = 'tag'
+    actors = 'actors'
+    directors = 'directors'
+    release_year = 'release_year'
+    release_date = 'release_date'
+    summary = 'summary'
+    tmdb_keywords = 'tmdb_keywords'
+    poster_url = 'poster'
 
     def __str__(self):
-        return self.name
+        return self.value
 
 
 class File(Enum):
     # ratings.dat - UserID::MovieID::Rating::Timestamp
     ratings = (
         'ratings',
-        [Column.user_id.name, Column.movie_id.name, Column.rating.name, Column.timestamp.name],
-        [Column.user_id.name, Column.movie_id.name],
-        {Column.rating.name: 'float16', Column.timestamp.name: 'int32'},
+        [Column.user_id.value, Column.movie_id.value, Column.rating.value, Column.timestamp.value],
+        [Column.user_id.value, Column.movie_id.value],
+        {Column.rating.value: 'float64', Column.timestamp.value: 'int32'},
     )
     # movies.dat - MovieID::Title::Genres
-    movies = ('movies', [Column.movie_id.name, Column.title.name, Column.genres.name], Column.movie_id.name)
+    movies = ('movies', [Column.movie_id.value, Column.title.value, Column.genres.value], Column.movie_id.value)
     # users.dat - UserID::Gender::Age::Occupation::Zip-code
     users = (
         'users',
-        [Column.user_id.name, Column.gender.name, Column.age.name, Column.occupation.name, Column.zip_code.name],
-        Column.user_id.name
+        [Column.user_id.value, Column.gender.value, Column.age.value, Column.occupation.value, Column.zip_code.value],
+        Column.user_id.value
     )
     # tags.csv: userId, movieId, tag, timestamp
-    tags = ('tags', [Column.user_id.name, Column.movie_id.name, Column.tag.name, Column.timestamp.name], None)
+    tags = ('tags', [Column.user_id.value, Column.movie_id.value, Column.tag.value, Column.timestamp.value], None)
     # links.csv: movieId,imdbId,tmdbId
-    links = ('links', [Column.movie_id.name, Column.imdb_id.name, Column.tmdb_id.name], None)
-    movie_meta = ('movie_meta', None, 0, {
-        'tmdb_adult': 'boolean',
-        'tmdb_video': 'boolean',
-        'tmdb_budget': 'Int64',
-        'tmdb_revenue': 'Int64',
-        'tmdb_vote_count': 'Int16',
-        'imdbMovieId': 'str',
-        'releaseYear': 'Int16',
-        'runtime': 'Int16',
-    })
+    links = ('links', [Column.movie_id.value, Column.imdb_id.value, Column.tmdb_id.value], None)
+    movie_meta = (
+        'movie_meta',
+        [Column.movie_id.value, 'tmdb_original_language', Column.tmdb_keywords.tmdb_keywords, 'tmdb_video',
+         'tmdb_title', 'tmdb_recommendations', 'tmdb_backdrop_path', 'tmdb_revenue', 'tmdb_genres', 'tmdb_popularity',
+         'tmdb_production_countries', 'tmdb_vote_count', 'tmdb_budget', 'tmdb_similar', 'tmdb_original_title',
+         'tmdb_spoken_languages', 'tmdb_production_companies', 'tmdb_vote_average', 'tmdb_belongs_to_collection',
+         'tmdb_tagline', 'tmdb_adult', 'tmdb_homepage', 'tmdb_status', 'imdb_country', 'imdb_color',
+         'imdb_budgetCurrency', 'imdb_directors', 'imdb_runtime', 'imdb_writers', 'imdb_originalLanguage',
+         'imdb_coverLink', 'imdb_genres', 'imdb_productionCompanies', 'imdb_budget', 'languages',
+         Column.release_date.value, 'dvdReleaseDate', Column.directors.value, 'runtime', 'movielens_id',
+         Column.title.value, 'mpaa', Column.actors.value, Column.imdb_id.value, 'originalTitle', Column.genres.value,
+         'youtubeTrailerIds', Column.summary.value, Column.tmdb_id.value, 'avgRating', Column.release_year.value,
+         'numRatings', 'posterPath'],
+        0,
+        {'tmdb_adult': 'boolean', 'tmdb_video': 'boolean',
+         'tmdb_budget': 'Int64', 'tmdb_revenue': 'Int64',
+         'tmdb_vote_count': 'Int16', Column.imdb_id.value: 'str', Column.release_year.value: 'Int16',
+         'runtime': 'Int16', 'tmdb_status': 'category', 'mpaa': 'category',
+         'imdb_originalLanguage': 'category', 'imdb_color': 'category', 'imdb_country': 'category'}
+    )
 
     def __init__(self, filename: str, header: List[str], index: List[str], dtypes: Dict[str, str] = None):
         self.filename = filename
@@ -85,8 +102,6 @@ class Data:
     @classmethod
     @synchronized
     def init(cls, ml_path: str = None, preload_files: bool = False):
-
-        ml_path = 'ml-latest-small'
 
         max_size = 0
 
@@ -190,7 +205,7 @@ class Data:
 
     @classmethod
     @synchronized
-    def ratings(cls, include_timestamps: bool = False) -> pd.DataFrame:
+    def ratings(cls, include_timestamps: bool = False, use_multi_index: bool = False) -> pd.DataFrame:
 
         if cls.__file_paths is None:
             cls.init()
@@ -224,7 +239,10 @@ class Data:
             # Note: read_csv has an option for this, however apparently uses unstable APIs when generating a multi-index
             cls.__cache[file].set_index(keys=file.index, inplace=True)
 
-        return cls.__cache[file]
+        if use_multi_index:
+            return cls.__cache[file]
+        else:
+            return cls.__cache[file].reset_index()
 
     @classmethod
     def ratings_as_series(cls) -> pd.Series:
@@ -247,7 +265,9 @@ class Data:
 
         if file not in cls.__cache:
             cls.__cache[file] = pd.read_csv(
-                path, index_col=0, engine='c', dtype=file.dtypes, parse_dates=['releaseDate'])
+                path, index_col=0, engine='c', names=file.header, header=0,
+                dtype=file.dtypes, parse_dates=[Column.release_date.value]
+            )
             # cls.__cache[file].rename_axis('movieId', inplace=True)
 
         return cls.__cache[file]

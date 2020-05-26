@@ -11,7 +11,12 @@ def get_poster_omdb_imdb(imdb_movie_id: str = None) -> str:
         'apikey': OMDB_API_KEY
     })
 
-    return r.json()['Poster']
+    j = r.json()
+
+    if j['Response'] == 'False':
+        return ''
+    else:
+        return r.json()['Poster']
 
 
 def get_poster_omdb_ml(movielens_id: int) -> str:
