@@ -85,6 +85,9 @@ class Data:
     @classmethod
     @synchronized
     def init(cls, ml_path: str = None, preload_files: bool = False):
+
+        ml_path = 'ml-latest-small'
+
         max_size = 0
 
         if ml_path is not None:

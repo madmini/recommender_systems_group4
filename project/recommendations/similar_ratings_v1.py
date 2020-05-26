@@ -7,6 +7,9 @@ def recommend_movies(movie_id: int, n: int) -> List[int]:
     ratings = ratings.reset_index()
     ratedUsers = ratings.loc[ratings['movie_id'] == movie_id][['user_id']]
     ratedUsersRating = ratedUsers.merge(ratings, left_on='user_id', right_on='user_id')
+
+    print(ratedUsersRating)
+
     ratedUsersRating = ratedUsersRating.drop(ratedUsersRating[ratedUsersRating['movie_id'] == movie_id].index)
 
     countedSumRatings = ratedUsersRating.groupby('movie_id').agg({'rating': 'sum', 'user_id': 'count'}).reset_index()
@@ -17,3 +20,6 @@ def recommend_movies(movie_id: int, n: int) -> List[int]:
     resultRatings = resultRatings['movie_id'].values.tolist()
 
     return resultRatings
+
+
+print(recommend_movies(123, 5))

@@ -4,18 +4,18 @@ from typing import List, Dict, Callable
 
 import pandas as pd
 
-from recommendations import example
-from recommendations import test
+from recommendations import dummy, similar_ratings_v1, similar_ratings_v2
 from util.data import Data
 from util.movie_posters import get_poster_omdb_imdb
 
 
 class Method(Enum):
-    dummy = ('dummy', example.recommend_movies)
+    dummy = ('dummy', dummy.recommend_movies)
 
     # ADD METHODS HERE
     # internal_method_name = ('Display Name', package.method_name)
-    test = ('test', test.recommend_movies)
+    similar_ratings_v1 = ('Similar User Ratings', similar_ratings_v1.recommend_movies)
+    similar_ratings_v2 = ('Similar User Ratings + Popularity Bias', similar_ratings_v2.recommend_movies)
 
     def __init__(self, name: str, method: Callable[[int, int], List[int]]):
         # note: the field 'name' is reserved for enums
@@ -37,8 +37,6 @@ class Method(Enum):
     @classmethod
     def default(cls):
         return cls.dummy
-
-
 
 
 def recommend_movies(
