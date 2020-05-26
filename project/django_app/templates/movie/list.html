@@ -4,20 +4,26 @@
 {% block content %}
     <table>
         <thead>
-            <tr>
-                <th>Id</th>
-                <th>Poster</th>
-                <th>Title</th>
-                <th>Summary</th>
-            </tr>
+        <tr>
+            <th>Id</th>
+            <th>Poster</th>
+            <th>Title</th>
+            <th>Summary</th>
+        </tr>
         </thead>
         <tbody>
+        <tr class="base_movie">
+            <td>{{ base_movie.movielens_id }}</td>
+            <td><img height="145px" src="{{ base_movie.poster }}" alt="missing poster"/></td>
+            <td>{{ base_movie.title }}<br /><i>(Reference)</i></td>
+            <td>{{ base_movie.summary }}</td>
+        </tr>
         {% for r in recommendations %}
             <tr>
-                <td>{{ r.id }}</td>
-                <td><img height="150px"  src="{{ r.omdbPoster }}" alt="whoops"/></td>
+                <td>{{ r.movielens_id }}</td>
+                <td><img height="145px" src="{{ r.poster }}" alt="missing poster"/></td>
                 <td>{{ r.title }}</td>
-                <td>{{ r.plotSummary }}</td>
+                <td>{{ r.summary }}</td>
             </tr>
         {% endfor %}
         </tbody>
