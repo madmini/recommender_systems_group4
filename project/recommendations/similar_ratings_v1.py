@@ -8,7 +8,7 @@ def recommend_movies(movie_id: int, n: int) -> List[int]:
     ratedUsers = ratings.loc[ratings['movie_id'] == movie_id][['user_id']]
     ratedUsersRating = ratedUsers.merge(ratings, left_on='user_id', right_on='user_id')
 
-    print(ratedUsersRating)
+    # print(ratedUsersRating)
 
     ratedUsersRating = ratedUsersRating.drop(ratedUsersRating[ratedUsersRating['movie_id'] == movie_id].index)
 
