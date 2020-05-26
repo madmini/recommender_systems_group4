@@ -44,4 +44,4 @@ def recommend_movies(movie_id: int, n: int) -> List[int]:
     return results.index.to_list()
 
 
-print(recommend_movies(123, 5))
+# print(recommend_movies(123, 5))

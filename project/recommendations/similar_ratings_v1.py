@@ -22,4 +22,4 @@ def recommend_movies(movie_id: int, n: int) -> List[int]:
     return resultRatings
 
 
-print(recommend_movies(123, 5))
+# print(recommend_movies(123, 5))

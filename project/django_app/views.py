@@ -58,7 +58,7 @@ def redirect_main(request):
 
 def search_post(request):
 
-    print(request.POST)
+    # print(request.POST)
 
     return redirect(
         'display_similar',
