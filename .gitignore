@@ -216,3 +216,5 @@ fabric.properties
 
 ## Additional Stuff
 .idea/**/misc.xml
+
+**.secret.*

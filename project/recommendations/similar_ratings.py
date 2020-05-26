@@ -20,17 +20,14 @@ def recommend_movies(movie_id: int, n: int, filter_below_avg_ratings: bool = Fal
 
     # first get the ratings for the base movie
     ratings_of_base_movie = ratings.query('movie_id == %s' % movie_id)
+
+    # check if there are reviews for this movie
     if ratings_of_base_movie.empty:
         raise MissingDataException('no ratings for movie_id %s' % movie_id)
 
     if filter_below_avg_ratings:
         # of those, select the above average ratings
         avg_rating = ratings_of_base_movie['rating'].mean()
-
-        print(ratings_of_base_movie)
-        print(ratings_of_base_movie['rating'].unique())
-        print(avg_rating)
-
         # query is actually faster than the python subscription syntax ( users[users['rating'] >= avg] )
         ratings_of_base_movie = ratings_of_base_movie.query('rating >= %f' % avg_rating)
 
@@ -41,6 +38,9 @@ def recommend_movies(movie_id: int, n: int, filter_below_avg_ratings: bool = Fal
     relevant_movies = relevant_movies[['movie_id', 'rating']]
     # remove the base movie from the results
     relevant_movies = relevant_movies.query('movie_id != %s' % movie_id)
+
+    if relevant_movies.empty:
+        raise MissingDataException('no other ratings from users that rated movie_id %s' % movie_id)
 
     # group by movie
     relevant_movie_groups = relevant_movies.groupby('movie_id')

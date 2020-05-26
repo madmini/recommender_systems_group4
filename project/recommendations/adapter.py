@@ -5,9 +5,9 @@ from typing import List, Dict, Callable
 import pandas as pd
 
 from recommendations import dummy, similar_ratings
-from util.exception import MovieNotFoundException, MethodNotFoundException
 from util.data import Data, Column
-from util.movie_posters import get_poster_omdb_imdb
+from util.exception import MovieNotFoundException, MethodNotFoundException
+from util.movie_posters import Poster
 
 
 class Method(Enum):
@@ -15,6 +15,9 @@ class Method(Enum):
 
     # ADD METHODS HERE
     # internal_method_name = ('Display Name', package.method_name)
+    # Note: if a method has the same internal name as an imported package, its name will hide the package name
+
+    # similar user ratings
     similar_ratings_plain = ('Similar User Ratings', similar_ratings.recommend_movies)
     similar_ratings_above_avg = ('Similar above-avg User Ratings', similar_ratings.recommend_movies_filter_avg)
     similar_ratings_pop = ('Similar User Ratings + Popularity Bias', similar_ratings.recommend_movies_popularity_bias)
@@ -96,7 +99,8 @@ def get_movie_data(movie_ids: List[int]) -> List[Dict]:
     # fetch poster urls asynchronously
     urls: List[str]
     with ThreadPool(len(movie_ids)) as p:
-        urls = p.map(get_poster_omdb_imdb, meta[Column.imdb_id.value].to_list())
+        # urls = p.map(Poster.get_poster_omdb_imdb, meta[Column.imdb_id.value].to_list())
+        urls = p.map(Poster.get_poster_tmdb, meta[Column.tmdb_id.value].to_list())
 
     # fill poster urls into dictionary
     for index, mapping in enumerate(meta_dict):
