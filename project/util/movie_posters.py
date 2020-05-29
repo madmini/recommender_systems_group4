@@ -24,13 +24,15 @@ class Poster:
     }
 
     @classmethod
-    def init(cls, update_tmdb_config: bool = False):
+    def init(cls, api_key_file_path: str = None, update_tmdb_config: bool = False):
         import os
         import simplejson
 
-        j: Dict
+        if api_key_file_path is None:
+            api_key_file_path = os.path.join(settings.BASE_DIR, 'util', api_keys_filename)
 
-        with open(os.path.join(settings.BASE_DIR, 'util', api_keys_filename), encoding='utf8') as f:
+        j: Dict
+        with open(api_key_file_path, encoding='utf8') as f:
             j = simplejson.load(f, encoding='utf8')
 
         for api_key in api_key_names:
@@ -82,9 +84,6 @@ class Poster:
 
         j = r.json()
 
-        print(r)
-        print(j)
-
         if not r.ok or 'success' in j and j['success'] == 'false':
             return ''
             # raise Exception(j['status_message'], j)
@@ -93,7 +92,7 @@ class Poster:
             return ''
 
         poster = None
-        for lang in ['null', 'en', 'de']:
+        for lang in ['en', 'de', None]:
             try:
                 poster = next(poster for poster in j['posters'] if poster['iso_639_1'] == lang)
                 break
@@ -161,4 +160,5 @@ class Poster:
 
 
 if __name__ == '__main__':
-    Poster.get_poster_omdb_ml(1)
+    Poster.init('apikeys.secret.json')
+    print(Poster.get_poster_tmdb_ml(1))

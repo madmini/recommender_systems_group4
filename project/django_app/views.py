@@ -1,8 +1,9 @@
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect
 
 from recommendations.adapter import *
 from util.exception import MovieNotFoundException, MethodNotFoundException, MissingDataException
+from util.search import Search
 
 
 def search(request):
@@ -62,6 +63,12 @@ def redirect_main(request):
 
 
 def search_post(request):
+    print(request.POST.get('movie'))
+
+    r = Search.search(request.POST.get('movie')[0])
+
+    return HttpResponse(r)
+
     return redirect(
         'display_similar',
         movie_id=request.POST.get('movie'),
