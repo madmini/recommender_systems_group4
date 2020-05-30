@@ -38,6 +38,7 @@ class Column(Enum):
     tagline = 'tmdb_tagline'
     keywords = 'tmdb_keywords'
     poster_url = 'poster'
+    num_ratings = 'numRatings'
 
     def __str__(self):
         return self.value
@@ -75,7 +76,7 @@ class File(Enum):
          Column.release_date.value, 'dvdReleaseDate', Column.directors.value, 'runtime', 'movielens_id',
          Column.title.value, 'mpaa', Column.actors.value, Column.imdb_id.value, 'originalTitle', Column.genres.value,
          'youtubeTrailerIds', Column.summary.value, Column.tmdb_id.value, 'avgRating', Column.release_year.value,
-         'numRatings', 'posterPath'],
+         Column.num_ratings.value, 'posterPath'],
         0,
         {'tmdb_adult': 'boolean', 'tmdb_video': 'boolean',
          'tmdb_budget': 'Int64', 'tmdb_revenue': 'Int64',
@@ -248,7 +249,7 @@ class Data:
     @classmethod
     def ratings_as_series(cls) -> pd.Series:
         # since there is only one real column, squeeze the columns into a single series
-        return cls.ratings(include_timestamps=False).squeeze(axis='columns')
+        return cls.ratings(include_timestamps=False, use_multi_index=True).squeeze(axis='columns')
 
     @classmethod
     @synchronized

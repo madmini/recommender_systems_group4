@@ -2,6 +2,7 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import render, redirect
 
 from recommendations.adapter import *
+from util.data_helper import get_movie_meta_for
 from util.exception import MovieNotFoundException, MethodNotFoundException, MissingDataException
 from util.search import Search
 
@@ -33,7 +34,7 @@ def display_similar(request, movie_id: int, method: str = None):
             request.session['method'] = method
 
     try:
-        movie = get_movie_data(movie_id)[0]
+        movie = get_movie_meta_for([movie_id])[0]
         recommendations = recommend_movies(movie_id, 5, method_name=method)
 
     except MovieNotFoundException:
@@ -64,10 +65,6 @@ def redirect_main(request):
 
 def search_post(request):
     print(request.POST.get('movie'))
-
-    r = Search.search(request.POST.get('movie')[0])
-
-    return HttpResponse(r)
 
     return redirect(
         'display_similar',
