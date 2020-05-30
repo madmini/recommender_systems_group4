@@ -1,3 +1,4 @@
+import functools
 from enum import Enum
 from typing import List, Dict, Callable
 
@@ -40,6 +41,7 @@ class Method(Enum):
         }
 
 
+# @functools.lru_cache(maxsize=None, typed=False)
 def recommend_movies(movie_id: int, n: int, method_name: str = None, method: Method = None) -> List[Dict]:
     if method is None:
         if method_name is None or method_name not in Method.__members__:

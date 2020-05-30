@@ -1,3 +1,4 @@
+import functools
 from typing import Dict
 
 import requests
@@ -70,6 +71,7 @@ class Poster:
             return 0
 
     @classmethod
+    @functools.lru_cache(maxsize=None, typed=False)
     def get_poster_tmdb(cls, tmdb_movie_id: int) -> str:
         if 'tmdb_v3' not in cls._api_keys:
             cls.init()

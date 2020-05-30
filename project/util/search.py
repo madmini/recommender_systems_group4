@@ -1,3 +1,4 @@
+import functools
 import os
 from typing import Dict
 
@@ -113,6 +114,7 @@ class Search:
             return results_dict
 
     @classmethod
+    @functools.lru_cache(maxsize=512, typed=False)
     def search(cls, query_text: str, n: int, add_posters: bool = True):
         # this method applies a popularity bias to search results
         # as they need to be resorted, more search terms should be provided than necessary,
