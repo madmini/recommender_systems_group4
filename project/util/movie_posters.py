@@ -14,7 +14,7 @@ api_key_names = {
 
 
 class Poster:
-    _poster_size: str = 'w185'
+    _poster_size: str = 'w342'
     _api_keys: Dict[str, str] = dict()
     _tmdb_api_conf = {
         "images": {
@@ -72,7 +72,9 @@ class Poster:
 
     @classmethod
     @functools.lru_cache(maxsize=None, typed=False)
-    def get_poster_tmdb(cls, tmdb_movie_id: int) -> str:
+    def get_poster_tmdb(cls, tmdb_movie_id: int, poster_size: str = None) -> str:
+        if poster_size is None:
+            poster_size = cls._poster_size
         if 'tmdb_v3' not in cls._api_keys:
             cls.init()
 
@@ -104,7 +106,7 @@ class Poster:
         if poster is None:
             poster = j['posters'][0]
 
-        poster_url = str(cls._tmdb_api_conf['images']['base_url']) + str(cls._poster_size) + str(poster['file_path'])
+        poster_url = str(cls._tmdb_api_conf['images']['base_url']) + str(poster_size) + str(poster['file_path'])
 
         return poster_url
 

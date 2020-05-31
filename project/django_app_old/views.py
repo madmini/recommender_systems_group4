@@ -1,10 +1,8 @@
-from django.http import Http404, HttpResponse
+from django.http import Http404
 from django.shortcuts import render, redirect
 
 from recommendations.adapter import *
-from util.data_helper import get_movie_meta_for
 from util.exception import MovieNotFoundException, MethodNotFoundException, MissingDataException
-from util.search import Search
 
 
 def search(request):
@@ -22,7 +20,7 @@ def search(request):
         'methods': get_methods(),
     }
 
-    return render(request, 'movie/search.html', context)
+    return render(request, 'movie_old/search.html', context)
 
 
 def display_similar(request, movie_id: int, method: str = None):
@@ -34,8 +32,7 @@ def display_similar(request, movie_id: int, method: str = None):
             request.session['method'] = method
 
     try:
-        movie = get_movie_meta_for([movie_id])[0]
-        recommendations = recommend_movies(movie_id, 5, method_name=method)
+        movies = recommend_movies(movie_id, 5, method_name=method)
 
     except MovieNotFoundException:
         raise Http404("We do not have data on a movie with ID %s." % movie_id)
@@ -52,11 +49,11 @@ def display_similar(request, movie_id: int, method: str = None):
         },
         'current_method': method,
         'methods': get_methods(),
-        'base_movie': movie,
-        'recommendations': recommendations
+        'base_movie': movies[0],
+        'recommendations': movies[1:]
     }
 
-    return render(request, 'movie/list.html', context)
+    return render(request, 'movie_old/list.html', context)
 
 
 def redirect_main(request):
@@ -64,7 +61,7 @@ def redirect_main(request):
 
 
 def search_post(request):
-    print(request.POST.get('movie'))
+    # print(request.POST.get('movie'))
 
     return redirect(
         'display_similar',

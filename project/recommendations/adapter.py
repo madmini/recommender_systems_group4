@@ -48,7 +48,8 @@ def recommend_movies(movie_id: int, n: int, method_name: str = None, method: Met
             raise MethodNotFoundException(method_name)
         method = Method[method_name]
 
-    recommendations: List[int] = method(movie_id, n)
+    recommendations: List[int] = [movie_id]
+    recommendations += method(movie_id, n)
 
     return get_movie_meta_for(recommendations)
 
