@@ -1,0 +1,32 @@
+<div class="carousel-item{% if active %} active{% endif %}" data-slide-number="{{ index }}">
+    <div class="container-fluid">
+        <div class="jumbotron row limited-row hero-movie py-5">
+
+            <div class="col col-md-auto limiter text-center">
+                <img class="mx-auto rounded hero-poster" alt="Poster"
+                     src="{{ movie.poster }}">
+            </div>
+
+            <div class="col hero-movie-info">
+                <h1 class="display-4 title hero-movie-info-title">
+                    {{ movie.title }}
+                    <small class="hero-movie-info-subtitle">({{ movie.release_year }})</small>
+                </h1>
+                <div class="hero-movie-info-body limited-field">
+                    <p class="lead hero-movie-info-summary">
+                        {{ movie.summary }}
+                    </p>
+                    <hr class="my-4">
+                    <p class="lead">{{ movie.genres }}</p>
+                </div>
+                <div class="lead mt-4 mb-2">
+                    <a class="btn btn-primary btn-lg" role="button"
+                       href="{% url 'recommend_default' movie_id=movie.movielens_id %}">
+                        More like this
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

@@ -1,13 +1,10 @@
+import functools
 from enum import Enum
-from multiprocessing.pool import ThreadPool
 from typing import List, Dict, Callable
 
-import pandas as pd
-
 from recommendations import dummy, similar_ratings
-from util.data import Data, Column
-from util.exception import MovieNotFoundException, MethodNotFoundException
-from util.movie_posters import Poster
+from util.data_helper import get_movie_meta_for
+from util.exception import MethodNotFoundException
 
 
 class Method(Enum):
@@ -44,66 +41,29 @@ class Method(Enum):
         }
 
 
-def recommend_movies(movie_id: int, n: int, method_name: str = None, method: Method = None) -> List[Dict]:
+# @functools.lru_cache(maxsize=None, typed=False)
+def _recommend_movies(movie_id: int, n: int, method: Method) -> List[Dict]:
+    recommendations: List[int] = [movie_id]
+    recommendations += method(movie_id, n)
+
+    return get_movie_meta_for(recommendations)
+
+
+def recommend_movies(movie_id: int, n: int, method_name: str = None, method: Method = None):
     if method is None:
         if method_name is None or method_name not in Method.__members__:
             raise MethodNotFoundException(method_name)
         method = Method[method_name]
 
-    # recommendations: List[int] = method.method.recommend_movies(movie_id, n)
-    recommendations: List[int] = method(movie_id, n)
-
-    return get_movie_data(recommendations)
-
-    # meta: pd.DataFrame = Data.movie_meta().loc[recommendations]
-    #
-    # meta_dict: List[Dict[str, str]] = meta.to_dict(orient='records')
-    #
-    # with ThreadPool(n) as p:
-    #     urls = p.map(get_poster_omdb_imdb, meta[Column.imdb_id.value].to_list())
-    #     for index, mapping in enumerate(meta_dict):
-    #         mapping[Column.poster_url.value] = urls[index]
-    #
-    # return meta_dict
+    return _recommend_movies(movie_id, n, method)
 
 
-def get_methods() -> List[Dict[str, str]]:
-    return [method.as_dict() for method in Method]
+def get_methods(active_method: str = None) -> List[Dict[str, str]]:
+    methods = list()
+    for method in Method:
+        method_dict = method.as_dict()
+        if method.name == active_method or method == active_method:
+            method_dict['active'] = True
+        methods.append(method_dict)
 
-
-# def get_movie_data(movie_id: int) -> Dict:
-#     meta: pd.DataFrame = Data.movie_meta()
-#     if movie_id not in meta:
-#         pass
-#
-#     return meta.loc[movie_id].to_dict()  # orient='records')
-
-
-def get_movie_data(movie_ids: List[int]) -> List[Dict]:
-    # if single movie, pack into list
-    if isinstance(movie_ids, int):
-        movie_ids = [movie_ids]
-
-    meta: pd.DataFrame = Data.movie_meta()
-
-    try:
-        # filter metadata
-        meta = meta.loc[movie_ids]
-    except KeyError as e:
-        raise MovieNotFoundException(e.args)
-
-    # fetch metadata for the movies, convert to dictionary
-    # orientation='records' results in [{'col1': 'val1', 'col2': 'val2'}, {'col1': 'val1', ..}]
-    meta_dict: List[Dict] = meta.to_dict(orient='records')
-
-    # fetch poster urls asynchronously
-    urls: List[str]
-    with ThreadPool(len(movie_ids)) as p:
-        # urls = p.map(Poster.get_poster_omdb_imdb, meta[Column.imdb_id.value].to_list())
-        urls = p.map(Poster.get_poster_tmdb, meta[Column.tmdb_id.value].to_list())
-
-    # fill poster urls into dictionary
-    for index, mapping in enumerate(meta_dict):
-        mapping[Column.poster_url.value] = urls[index]
-
-    return meta_dict
+    return methods

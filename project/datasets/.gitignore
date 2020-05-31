@@ -4,6 +4,9 @@ ml-*/*
 full_meta/*
 # .json base files
 full_meta/**/*.json
+# search index
+search_index/
+*.tmp
 
 ## exceptions
 # docs

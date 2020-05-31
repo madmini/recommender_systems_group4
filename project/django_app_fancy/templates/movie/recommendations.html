@@ -1,0 +1,45 @@
+{% extends 'movie/base.html' %}
+
+{% block title %}
+    {% if mode == 'recommend' %}
+        Recommendations for {{ movies.0.title }}
+    {% elif mode == 'search' %}
+        Results for "{{ search_query }}"
+    {% endif %}
+{% endblock %}
+
+{% block header %}
+    {% include 'movie/header.html' with methods=methods %}
+{% endblock %}
+
+<!-- carousel with thumbnails concept: https://www.codeply.com/p/4ROQRamTcN -->
+
+{% block content %}
+    <main>
+        <div id="slider">
+            <div id="movie-carousel" class="carousel slide">
+
+                <div class="carousel-inner">
+
+                    {% for movie in movies %}
+                        {% include 'movie/movie_info_item.html' with movie=movie index=forloop.counter0 active=forloop.first %}
+                    {% endfor %}
+
+                </div>
+
+                <div class="container-fluid">
+                    <div class="carousel-indicators card-group flex-row flex-nowrap align-items-stretch m-4">
+
+                        {% for movie in movies %}
+
+                            {% include 'movie/movie_list_item.html' with movie=movie index=forloop.counter0 active=forloop.first %}
+
+                        {% endfor %}
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+{% endblock %}
