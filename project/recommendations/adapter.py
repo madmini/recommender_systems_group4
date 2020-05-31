@@ -42,17 +42,28 @@ class Method(Enum):
 
 
 # @functools.lru_cache(maxsize=None, typed=False)
-def recommend_movies(movie_id: int, n: int, method_name: str = None, method: Method = None) -> List[Dict]:
-    if method is None:
-        if method_name is None or method_name not in Method.__members__:
-            raise MethodNotFoundException(method_name)
-        method = Method[method_name]
-
+def _recommend_movies(movie_id: int, n: int, method: Method) -> List[Dict]:
     recommendations: List[int] = [movie_id]
     recommendations += method(movie_id, n)
 
     return get_movie_meta_for(recommendations)
 
 
-def get_methods() -> List[Dict[str, str]]:
-    return [method.as_dict() for method in Method]
+def recommend_movies(movie_id: int, n: int, method_name: str = None, method: Method = None):
+    if method is None:
+        if method_name is None or method_name not in Method.__members__:
+            raise MethodNotFoundException(method_name)
+        method = Method[method_name]
+
+    return _recommend_movies(movie_id, n, method)
+
+
+def get_methods(active_method: str = None) -> List[Dict[str, str]]:
+    methods = list()
+    for method in Method:
+        method_dict = method.as_dict()
+        if method.name == active_method or method == active_method:
+            method_dict['active'] = True
+        methods.append(method_dict)
+
+    return methods

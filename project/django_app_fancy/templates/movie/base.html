@@ -1,0 +1,27 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    {% include 'movie/static.html' with what='css' file='recommendations.css' %}
+
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+
+{% block header %}{% endblock %}
+
+{% block content %}{% endblock %}
+
+{% if not nofooter %}
+    {% include 'movie/footer.html' %}
+{% endif %}
+
+{% include 'movie/static.html' with what='js' %}
+
+
+</body>
+</html>

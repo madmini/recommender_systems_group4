@@ -11,6 +11,6 @@ urlpatterns = [
         name='search_post'
     ),
 
-    path('search/', views.search, name='search'),
+    path('search/', views.search, name='search_old'),
     path('similar/<int:movie_id>/<str:method>', views.display_similar, name='display_similar'),
 ]

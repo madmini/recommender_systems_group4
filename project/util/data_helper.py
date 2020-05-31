@@ -31,6 +31,9 @@ def get_movie_meta_for(movie_ids: List[int]) -> List[Dict]:
 
 
 def add_poster_urls(movies: List[Dict]) -> None:
+    if movies is None or len(movies) == 0:
+        return
+
     # fetch poster urls asynchronously
     urls: List[str]
     with ThreadPool(len(movies)) as p:

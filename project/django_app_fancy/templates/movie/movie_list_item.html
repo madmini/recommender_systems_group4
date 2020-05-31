@@ -1,0 +1,8 @@
+<div class="carousel-indicator card{% if active %} active{% endif %}"
+     data-slide-to="{{ index }}" data-target="#movie-carousel">
+    <img class="movie-thumbnail card-img-top" alt="poster"
+         src="{{ movie.poster }}"/>
+    <div class="card-body text-wrap">
+        {{ movie.title }}
+    </div>
+</div>

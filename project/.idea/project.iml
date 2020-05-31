@@ -23,11 +23,15 @@
   <component name="PackageRequirementsSettings">
     <option name="modifyBaseFiles" value="true" />
   </component>
+  <component name="PyDocumentationSettings">
+    <option name="renderExternalDocumentation" value="true" />
+  </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Django" />
     <option name="TEMPLATE_FOLDERS">
       <list>
         <option value="$MODULE_DIR$/django_app_old/templates" />
+        <option value="$MODULE_DIR$/django_app_new/templates" />
       </list>
     </option>
   </component>

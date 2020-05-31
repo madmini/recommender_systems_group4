@@ -57,7 +57,7 @@ def display_similar(request, movie_id: int, method: str = None):
 
 
 def redirect_main(request):
-    return redirect('search')  # , permanent=True)
+    return redirect('search_old')  # , permanent=True)
 
 
 def search_post(request):

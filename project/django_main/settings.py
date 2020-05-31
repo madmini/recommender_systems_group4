@@ -15,6 +15,7 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OLD_APP_DIR = os.path.join(BASE_DIR, 'django_app_old')
+FANCY_APP_DIR = os.path.join(BASE_DIR, 'django_app_fancy')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -37,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_app_old.apps.DjangoOldAppConfig',
+    'django_app_fancy.apps.DjangoFancyAppConfig',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +56,7 @@ ROOT_URLCONF = 'django_main.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(OLD_APP_DIR, 'templates')],
+        'DIRS': [os.path.join(OLD_APP_DIR, 'templates'), os.path.join(FANCY_APP_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
