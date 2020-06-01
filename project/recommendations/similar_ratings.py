@@ -3,7 +3,7 @@ from typing import List
 import pandas as pd
 
 from util.exception import MissingDataException
-from util.data import Data
+from util.data import Data, Column
 
 
 def recommend_movies_popularity_bias(movie_id: int, n: int):
@@ -12,6 +12,18 @@ def recommend_movies_popularity_bias(movie_id: int, n: int):
 
 def recommend_movies_filter_avg(movie_id: int, n: int):
     return recommend_movies(movie_id, n, filter_below_avg_ratings=True)
+
+
+def recommend_movies_filter_genre(movie_id: int, n: int):
+    return recommend_movies_genre(movie_id, n)
+
+
+def recommend_movies_filter_genre_user_bias(movie_id: int, n: int):
+    return recommend_movies_genre(movie_id, n, user_bias=True)
+
+
+def recommend_movies_filter_genre_popularity_bias(movie_id: int, n: int):
+    return recommend_movies_genre(movie_id, n, user_bias=True, popularity_bias=True)
 
 
 def recommend_movies(movie_id: int, n: int, filter_below_avg_ratings: bool = False, popularity_bias: bool = False) \
@@ -62,3 +74,68 @@ def recommend_movies(movie_id: int, n: int, filter_below_avg_ratings: bool = Fal
     results_as_list = top_n_results.index.to_list()
 
     return results_as_list
+
+
+def recommend_movies_genre(movie_id: int,n: int, popularity_bias: bool = False, user_bias: bool = False):
+    results = get_movies_with_similar_genres(movie_id, n, popularity_bias=popularity_bias,user_bias=user_bias)
+    top_n_results = results.nlargest(n)
+    # export the list of movies
+    results_as_list = top_n_results.index.to_list()
+    # breakpoint()
+    return results_as_list
+
+
+def get_movies_with_similar_genres(movie_id: int, n: int, popularity_bias: bool = False, user_bias: bool = False):
+    # Get all movies and split them into the base movie and the rest
+    movies = Data.movies()
+    other_movies = movies.query('movie_id != %s' % movie_id)
+    base_movie = movies.query('movie_id == %s' % movie_id)
+
+    # extract the different genres from the base movie
+    base_movie_genres = base_movie[str(Column.genres)].str.get_dummies(sep='|')
+
+    # extend other_movies with bool columns representing the genres (1 has the genre, 0 not)
+    # furthermore the title and genres columns are removed and the movie_id is an index instead of column
+    movies_with_genres = pd.concat([other_movies, other_movies['genres'].str.get_dummies(sep='|')], axis=1)
+    movies_with_genres = movies_with_genres.drop(columns=['title', 'genres'])
+    movies_with_genres = movies_with_genres.set_index('movie_id')
+
+    # removes all column which are not in the base movie
+    filtered_movies = movies_with_genres.loc[:, base_movie_genres.columns.values.tolist()]
+
+    # sum up all columns to get the number of fitting genres
+    filtered_movies_sum = filtered_movies.sum(axis='columns')
+    # remove all movies which have no genre in common
+    filtered_movies_sum = filtered_movies_sum[filtered_movies_sum > 0]
+
+    # if user_bias is true
+    if user_bias:
+        # reduce the amount of movies to n * 10 movies
+        top_n_mul_ten = filtered_movies_sum.nlargest(n * 10)
+        ratings = Data.ratings()
+
+        # group by movie
+        ratings_grouped = ratings.groupby('movie_id')
+        # calculate mean rating and number of ratings for each movie
+        # (select rating to remove first level of column index. before: (rating: (mean, count)), after: (mean, count) )
+        measures: pd.DataFrame = ratings_grouped.agg(['mean', 'count'])['rating']
+
+        # merging mean, count and genre sum into one dataframe
+        measures_movies = pd.merge(measures, pd.DataFrame(top_n_mul_ten), left_index=True, right_index=True)
+        measures_movies = measures_movies.rename(columns={0: 'genre'})
+
+        if popularity_bias:
+            # give more weight to the number of ratings (~popularity)
+            # by raising the avg ratings to some power (to preserve some notion of good vs. bad ratings)
+            # and multiplying the count back in
+            # additionally multiply the genre back in
+            # to prevent good rated movies with little correlation to the genres
+            results = measures_movies.eval('(mean ** 3) * count * genre')
+        else:
+            # multiply genre to prevent good rated movies with little correlation to the genres
+            results = measures_movies.eval('mean * genre')
+    else:
+        results = filtered_movies_sum
+
+    # breakpoint()
+    return results

@@ -18,7 +18,12 @@ class Method(Enum):
     similar_ratings_plain = ('Similar User Ratings', similar_ratings.recommend_movies)
     similar_ratings_above_avg = ('Similar above-avg User Ratings', similar_ratings.recommend_movies_filter_avg)
     similar_ratings_pop = ('Similar User Ratings + Popularity Bias', similar_ratings.recommend_movies_popularity_bias)
-    similarity_ml =('ML',similarity_ml.recommend_movies)
+    similarity_ml = ('ML', similarity_ml.recommend_movies)
+    similar_rating_genre = ('Similar Genres Rating', similar_ratings.recommend_movies_filter_genre)
+    similar_rating_genre_user = ('Similar Genres Rating + User Bias'
+                                 , similar_ratings.recommend_movies_filter_genre_user_bias)
+    similar_rating_genre_pop = ('Similar Genres Rating + User Bias + Popularity Bias'
+                                , similar_ratings.recommend_movies_filter_genre_popularity_bias)
 
     @classmethod
     def default(cls):
