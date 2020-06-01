@@ -2,7 +2,7 @@ import functools
 from enum import Enum
 from typing import List, Dict, Callable
 
-from recommendations import dummy, similar_ratings
+from recommendations import dummy, similar_ratings,similarity_ml
 from util.data_helper import get_movie_meta_for
 from util.exception import MethodNotFoundException
 
@@ -18,6 +18,7 @@ class Method(Enum):
     similar_ratings_plain = ('Similar User Ratings', similar_ratings.recommend_movies)
     similar_ratings_above_avg = ('Similar above-avg User Ratings', similar_ratings.recommend_movies_filter_avg)
     similar_ratings_pop = ('Similar User Ratings + Popularity Bias', similar_ratings.recommend_movies_popularity_bias)
+    similarity_ml =('ML',similarity_ml.recommend_movies)
 
     @classmethod
     def default(cls):
