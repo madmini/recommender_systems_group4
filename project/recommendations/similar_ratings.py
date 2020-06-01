@@ -26,6 +26,10 @@ def recommend_movies_filter_genre_popularity_bias(movie_id: int, n: int):
     return recommend_movies_genre(movie_id, n, user_bias=True, popularity_bias=True)
 
 
+def recommend_movies_filter_meta(movie_id: int, n: int):
+    return recommend_movie_meta(movie_id, n)
+
+
 def recommend_movies(movie_id: int, n: int, filter_below_avg_ratings: bool = False, popularity_bias: bool = False) \
         -> List[int]:
     ratings = Data.ratings()
@@ -76,8 +80,9 @@ def recommend_movies(movie_id: int, n: int, filter_below_avg_ratings: bool = Fal
     return results_as_list
 
 
-def recommend_movies_genre(movie_id: int,n: int, popularity_bias: bool = False, user_bias: bool = False):
-    results = get_movies_with_similar_genres(movie_id, n, popularity_bias=popularity_bias,user_bias=user_bias)
+def recommend_movies_genre(movie_id: int, n: int, popularity_bias: bool = False, user_bias: bool = False):
+    # Get similar movies based on genre
+    results = get_movies_with_similar_genres(movie_id, n, popularity_bias=popularity_bias, user_bias=user_bias)
     top_n_results = results.nlargest(n)
     # export the list of movies
     results_as_list = top_n_results.index.to_list()
@@ -85,9 +90,12 @@ def recommend_movies_genre(movie_id: int,n: int, popularity_bias: bool = False, 
     return results_as_list
 
 
-def get_movies_with_similar_genres(movie_id: int, n: int, popularity_bias: bool = False, user_bias: bool = False):
+def get_movies_with_similar_genres(movie_id: int, n: int, popularity_bias: bool = False
+                                   , user_bias: bool = False, movies: pd.DataFrame = None):
     # Get all movies and split them into the base movie and the rest
-    movies = Data.movies()
+    if movies is None:
+        movies = Data.movies()
+
     other_movies = movies.query('movie_id != %s' % movie_id)
     base_movie = movies.query('movie_id == %s' % movie_id)
 
@@ -120,7 +128,7 @@ def get_movies_with_similar_genres(movie_id: int, n: int, popularity_bias: bool 
         # (select rating to remove first level of column index. before: (rating: (mean, count)), after: (mean, count) )
         measures: pd.DataFrame = ratings_grouped.agg(['mean', 'count'])['rating']
 
-        # merging mean, count and genre sum into one dataframe
+        # merging mean, count and genre sum into one DataFrame
         measures_movies = pd.merge(measures, pd.DataFrame(top_n_mul_ten), left_index=True, right_index=True)
         measures_movies = measures_movies.rename(columns={0: 'genre'})
 
@@ -139,3 +147,35 @@ def get_movies_with_similar_genres(movie_id: int, n: int, popularity_bias: bool 
 
     # breakpoint()
     return results
+
+
+def recommend_movie_meta(movie_id: int, n: int):
+
+    movies_meta = Data.movie_meta()
+    # movies_meta = movies_meta.rename(columns={'movielens_id': 'movie_id'})
+    movies_meta = movies_meta.set_index('movielens_id')
+    base_movie_meta = movies_meta.query('movielens_id == %s' % movie_id)
+    filtered_movies = movies_meta.query('tmdb_adult == %s' % base_movie_meta['tmdb_adult'].iloc[0])
+    filtered_movies = filtered_movies.query('imdb_color == "%s"' % base_movie_meta['imdb_color'].iloc[0])
+    movies = get_movies_with_similar_genres(movie_id, n, filtered_movies)
+
+    merged_movies = pd.merge(pd.DataFrame(movies), filtered_movies, left_index=True, right_index=True)
+    # select the best results (nlargest is significantly faster than sort+head for small n)
+    top_hundred = movies.nlargest(100)
+    # export the list of movies
+    results_as_list = top_hundred.index.to_list()
+
+    # adult
+    # color
+    # genre
+    # actor?
+    # tmdb_revenue? budget?
+    # tmdb_production_countries?
+    # imdb_productionCompanies?
+    # directors?
+    # year?
+
+    breakpoint()
+    return results_as_list
+
+

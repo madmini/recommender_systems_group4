@@ -24,7 +24,8 @@ class Method(Enum):
                                  , similar_ratings.recommend_movies_filter_genre_user_bias)
     similar_rating_genre_pop = ('Similar Genres Rating + User Bias + Popularity Bias'
                                 , similar_ratings.recommend_movies_filter_genre_popularity_bias)
-
+    similar_rating_meta = ('Similarity based on Meta-data'
+                           , similar_ratings.recommend_movies_filter_meta)
     @classmethod
     def default(cls):
         return cls.dummy
