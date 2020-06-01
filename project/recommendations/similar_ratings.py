@@ -104,9 +104,9 @@ def get_movies_with_similar_genres(movie_id: int, n: int, popularity_bias: bool 
 
     # extend other_movies with bool columns representing the genres (1 has the genre, 0 not)
     # furthermore the title and genres columns are removed and the movie_id is an index instead of column
-    movies_with_genres = pd.concat([other_movies, other_movies['genres'].str.get_dummies(sep='|')], axis=1)
-    movies_with_genres = movies_with_genres.drop(columns=['title', 'genres'])
-    movies_with_genres = movies_with_genres.set_index('movie_id')
+    movies_with_genres = pd.concat([other_movies, other_movies[str(Column.genres)].str.get_dummies(sep='|')], axis=1)
+    movies_with_genres = movies_with_genres.drop(columns=[str(Column.title), str(Column.genres)])
+    movies_with_genres = movies_with_genres.set_index(str(Column.movie_id))
 
     # removes all column which are not in the base movie
     filtered_movies = movies_with_genres.loc[:, base_movie_genres.columns.values.tolist()]
@@ -123,10 +123,10 @@ def get_movies_with_similar_genres(movie_id: int, n: int, popularity_bias: bool 
         ratings = Data.ratings()
 
         # group by movie
-        ratings_grouped = ratings.groupby('movie_id')
+        ratings_grouped = ratings.groupby(str(Column.movie_id))
         # calculate mean rating and number of ratings for each movie
         # (select rating to remove first level of column index. before: (rating: (mean, count)), after: (mean, count) )
-        measures: pd.DataFrame = ratings_grouped.agg(['mean', 'count'])['rating']
+        measures: pd.DataFrame = ratings_grouped.agg(['mean', 'count'])[str(Column.rating)]
 
         # merging mean, count and genre sum into one DataFrame
         measures_movies = pd.merge(measures, pd.DataFrame(top_n_mul_ten), left_index=True, right_index=True)
@@ -150,32 +150,57 @@ def get_movies_with_similar_genres(movie_id: int, n: int, popularity_bias: bool 
 
 
 def recommend_movie_meta(movie_id: int, n: int):
-
-    movies_meta = Data.movie_meta()
-    # movies_meta = movies_meta.rename(columns={'movielens_id': 'movie_id'})
-    movies_meta = movies_meta.set_index('movielens_id')
-    base_movie_meta = movies_meta.query('movielens_id == %s' % movie_id)
-    filtered_movies = movies_meta.query('tmdb_adult == %s' % base_movie_meta['tmdb_adult'].iloc[0])
-    filtered_movies = filtered_movies.query('imdb_color == "%s"' % base_movie_meta['imdb_color'].iloc[0])
-    movies = get_movies_with_similar_genres(movie_id, n, filtered_movies)
-
-    merged_movies = pd.merge(pd.DataFrame(movies), filtered_movies, left_index=True, right_index=True)
-    # select the best results (nlargest is significantly faster than sort+head for small n)
-    top_hundred = movies.nlargest(100)
-    # export the list of movies
-    results_as_list = top_hundred.index.to_list()
-
     # adult
     # color
     # genre
-    # actor?
+    # actor
+
     # tmdb_revenue? budget?
     # tmdb_production_countries?
     # imdb_productionCompanies?
     # directors?
     # year?
 
-    breakpoint()
+    # Get movie_meta data and set the index on movie_id
+    movies_meta = Data.movie_meta()
+    movies_meta = movies_meta.set_index('movielens_id')
+
+    # Get the meta data from the base movie
+    base_movie_meta = movies_meta.query('movielens_id == %s' % movie_id)
+
+    # filtered movies based on color and adult
+    filtered_movies = movies_meta.query('tmdb_adult == %s' % base_movie_meta['tmdb_adult'].iloc[0])
+    filtered_movies = filtered_movies.query('imdb_color == "%s"' % base_movie_meta['imdb_color'].iloc[0])
+
+    # filtered movies based on genre
+    movies = get_movies_with_similar_genres(movie_id, n, filtered_movies)
+
+    merged_movies = pd.merge(pd.DataFrame(movies), filtered_movies, left_index=True, right_index=True)
+
+    # get all actors from the base movie as list
+    base_actors = eval(base_movie_meta['actors'].iloc[0])
+
+    # create a series containing the actor string and it is indexed after movie_id
+    movies_actor = pd.Series(merged_movies['actors'].tolist(), index=merged_movies.index)
+    # get all movie_id's where at least one actor in the base actor list is in the movie
+    filtered_movies_actor = movies_actor[movies_actor.str.contains('|'.join(base_actors))]
+
+    merged_movies = pd.merge(merged_movies, pd.DataFrame(filtered_movies_actor), left_index=True, right_index=True)
+
+    # get the ratings/results like in recommend_movie
+    ratings = Data.ratings().query('movie_id != %s' % movie_id)
+    merged_ratings = pd.merge(ratings, merged_movies, left_on='movie_id', right_index=True)
+
+    # group by movie
+    ratings_grouped = merged_ratings.groupby('movie_id')
+    # calculate mean rating and number of ratings for each movie
+    # (select rating to remove first level of column index. before: (rating: (mean, count)), after: (mean, count) )
+    measures: pd.DataFrame = ratings_grouped.agg(['mean', 'count'])['rating']
+    results = measures.eval('(mean ** 3) * count')
+
+    top_n_results = results.nlargest(n)
+    # export the list of movies
+    results_as_list = top_n_results.index.to_list()
     return results_as_list
 
 
