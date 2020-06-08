@@ -166,7 +166,6 @@ def recommend_movie_meta(movie_id: int, n: int, popularity_bias: bool = False, u
     top_n_results = results.nlargest(n)
     # export the list of movies
     results_as_list = top_n_results.index.to_list()
-    breakpoint()
     return results_as_list
 
 
