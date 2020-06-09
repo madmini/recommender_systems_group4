@@ -159,7 +159,7 @@ def recommend_movie_meta(movie_id: int, n: int, popularity_bias: bool = False, u
             # and multiplying the count back in
             # additionally multiply the genre back in
             # to prevent good rated movies with little correlation to the genres
-            results = measures_movies.eval('((mean* score) ** 2) * count')
+            results = measures_movies.eval('((mean * score) ** 3) * count')
         else:
             # multiply genre to prevent good rated movies with little correlation to the genres
             results = measures_movies.eval('mean * score')
