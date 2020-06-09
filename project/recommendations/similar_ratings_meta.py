@@ -62,9 +62,8 @@ def recommend_movie_meta(movie_id: int, n: int, popularity_bias: bool = False, u
 
     # transform string into list and count the actors which are in the base and the rows
     base_actors = eval(base_movie_meta['actors'].iloc[0])
-    merged_movies['actors'] = merged_movies['actors'].tolist()
     merged_movies['actor_count'] = merged_movies.apply(lambda row:
-                                                       count_elements_in_list(row, base_actors, 'actors')
+                                                       count_elements_in_set(row, base_actors, 'actors')
                                                        , axis=1)
 
     # needed to calculate score: actor_count / max * actor_percentage
@@ -76,9 +75,8 @@ def recommend_movie_meta(movie_id: int, n: int, popularity_bias: bool = False, u
 
     # same as actors for directors
     base_directors = eval(base_movie_meta['directors'].iloc[0])
-    merged_movies['directors'] = merged_movies['directors'].tolist()
     merged_movies['director_count'] = merged_movies.apply(lambda row:
-                                                          count_elements_in_list(row, base_directors, 'directors')
+                                                          count_elements_in_set(row, base_directors, 'directors')
                                                           , axis=1)
 
     # needed to calculate score: director_count / max * director_percentage
@@ -98,10 +96,9 @@ def recommend_movie_meta(movie_id: int, n: int, popularity_bias: bool = False, u
 
     # same as actors for production countries
     base_production_countries = eval(base_movie_meta['tmdb_production_countries'].iloc[0])
-    merged_movies['tmdb_production_countries'] = merged_movies['tmdb_production_countries'].tolist()
     merged_movies['tmdb_production_countries_count'] \
         = merged_movies.apply(lambda row:
-                              count_elements_in_list(row, base_production_countries, 'tmdb_production_countries')
+                              count_elements_in_set(row, base_production_countries, 'tmdb_production_countries')
                               , axis=1)
 
     # needed to calculate score: production_countries_count / max * production_countries_percentage
@@ -113,9 +110,8 @@ def recommend_movie_meta(movie_id: int, n: int, popularity_bias: bool = False, u
 
     # same as actors for keywords
     base_keywords = eval(base_movie_meta['tmdb_keywords'].iloc[0])
-    merged_movies['tmdb_keywords'] = merged_movies['tmdb_keywords'].tolist()
     merged_movies['tmdb_keywords_count'] = merged_movies.apply(lambda row:
-                                                          count_elements_in_list(row, base_keywords, 'tmdb_keywords')
+                                                          count_elements_in_set(row, base_keywords, 'tmdb_keywords')
                                                           , axis=1)
 
     # needed to calculate score: keywords_count / max * keywords_percentage
@@ -180,3 +176,8 @@ def count_elements_in_list(row: pd.Series, base: list, column: str):
         if element in row[column]:
             count += 1
     return count
+
+# function to count the elements in row which are in the base too
+def count_elements_in_set(row: pd.Series, base: list, column: str):
+    actors = eval(row[column])
+    return len((set(base).intersection(actors)))
