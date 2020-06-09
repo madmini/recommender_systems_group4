@@ -39,6 +39,7 @@ class Column(Enum):
     keywords = 'tmdb_keywords'
     poster_url = 'poster'
     num_ratings = 'numRatings'
+    tmdb_similar = 'tmdb_recommendations'
 
     def __str__(self):
         return self.value
@@ -67,7 +68,7 @@ class File(Enum):
     movie_meta = (
         'movie_meta',
         [Column.movie_id.value, 'tmdb_original_language', Column.keywords.value, 'tmdb_video',
-         'tmdb_title', 'tmdb_recommendations', 'tmdb_backdrop_path', 'tmdb_revenue', 'tmdb_genres', 'tmdb_popularity',
+         'tmdb_title', Column.tmdb_similar.value, 'tmdb_backdrop_path', 'tmdb_revenue', 'tmdb_genres', 'tmdb_popularity',
          'tmdb_production_countries', 'tmdb_vote_count', 'tmdb_budget', 'tmdb_similar', 'tmdb_original_title',
          'tmdb_spoken_languages', 'tmdb_production_companies', 'tmdb_vote_average', 'tmdb_belongs_to_collection',
          Column.tagline.value, 'tmdb_adult', 'tmdb_homepage', 'tmdb_status', 'imdb_country', 'imdb_color',

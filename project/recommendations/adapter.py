@@ -2,13 +2,15 @@ import functools
 from enum import Enum
 from typing import List, Dict, Callable
 
-from recommendations import dummy, similar_ratings_user, similarity_ml, similar_ratings_meta, similar_ratings_genre
+from recommendations import dummy, reference, \
+    similar_ratings_user, similarity_ml, similar_ratings_meta, similar_ratings_genre
 from util.data_helper import get_movie_meta_for
 from util.exception import MethodNotFoundException
 
 
 class Method(Enum):
     dummy = ('dummy', dummy.recommend_movies)
+    reference = ('TMDb Recommendations Reference', reference.recommend_movies)
 
     # ADD METHODS HERE
     # internal_method_name = ('Display Name', package.method_name)

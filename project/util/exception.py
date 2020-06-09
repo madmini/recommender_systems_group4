@@ -3,6 +3,11 @@ class MovieNotFoundException(Exception):
     pass
 
 
+class UserNotFoundException(Exception):
+    """ UserID does not exist. """
+    pass
+
+
 class MethodNotFoundException(Exception):
     """ Method does not exist. """
     pass
