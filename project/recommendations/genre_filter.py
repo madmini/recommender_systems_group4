@@ -6,11 +6,13 @@ from util.exception import MissingDataException
 from util.data import Data, Column
 
 
-def get_movies_with_similar_genres(movie_id: int, n: int, popularity_bias: bool = False
+def get_movies_with_similar_genres(movie_id: int, n: int = 5, popularity_bias: bool = False
                                    , user_bias: bool = False, movies: pd.DataFrame = None):
     # Get all movies and split them into the base movie and the rest
     if movies is None:
         movies = Data.movies()
+    else:
+        movies = movies.join(Data.movies(), lsuffix='m_')
 
     other_movies = movies.query('movie_id != %s' % movie_id)
     base_movie = movies.query('movie_id == %s' % movie_id)

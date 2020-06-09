@@ -1,6 +1,7 @@
-import functools
 from enum import Enum
 from typing import List, Dict, Callable
+
+import pandas as pd
 
 from recommendations import dummy, reference, \
     similar_ratings_user, similarity_ml, similar_ratings_meta, similar_ratings_genre, same_actors
@@ -38,7 +39,7 @@ class Method(Enum):
     def default(cls):
         return cls.dummy
 
-    def __init__(self, name: str, method: Callable[[int, int], List[int]]):
+    def __init__(self, name: str, method: Callable[[int], pd.Series]):
         # note: the field 'name' is reserved for enums
         self.display_name = name
         self.method = method
@@ -58,10 +59,13 @@ class Method(Enum):
 
 # @functools.lru_cache(maxsize=None, typed=False)
 def _recommend_movies(movie_id: int, n: int, method: Method) -> List[Dict]:
-    recommendations: List[int] = [movie_id]
-    recommendations.extend(method(movie_id, n))
+    movies: List[int] = [movie_id]
 
-    return get_movie_meta_for(recommendations)
+    similar = method(movie_id)
+
+    movies.extend(similar.nlargest(n).index)
+
+    return get_movie_meta_for(movies)
 
 
 def recommend_movies(movie_id: int, n: int, method_name: str = None, method: Method = None):

@@ -1,25 +1,22 @@
-from typing import List
 import pandas as pd
 
 from recommendations import genre_filter
-
-from util.exception import MissingDataException
-from util.data import Data, Column
+from util.data import Data
 
 
-def recommend_movies_filter_meta(movie_id: int, n: int):
+def recommend_movies_filter_meta(movie_id: int, n: int = 5):
     return recommend_movie_meta(movie_id, n)
 
 
-def recommend_movies_filter_meta_user(movie_id: int, n: int):
+def recommend_movies_filter_meta_user(movie_id: int, n: int = 5):
     return recommend_movie_meta(movie_id, n, user_bias=True)
 
 
-def recommend_movies_filter_meta_popularity(movie_id: int, n: int):
+def recommend_movies_filter_meta_popularity(movie_id: int, n: int = 5):
     return recommend_movie_meta(movie_id, n, popularity_bias=True, user_bias=True)
 
 
-def recommend_movie_meta(movie_id: int, n: int, popularity_bias: bool = False, user_bias: bool = False):
+def recommend_movie_meta(movie_id: int, n: int = 5, popularity_bias: bool = False, user_bias: bool = False):
     # adult
     # color
 
@@ -38,22 +35,21 @@ def recommend_movie_meta(movie_id: int, n: int, popularity_bias: bool = False, u
 
     # Get movie_meta data and set the index on movie_id
     movies_meta = Data.movie_meta()
-    movies_meta = movies_meta.set_index('movielens_id')
 
     # Get the meta data from the base movie
-    base_movie_meta = movies_meta.query('movielens_id == %s' % movie_id)
+    base_movie_meta = movies_meta.query('movie_id == %s' % movie_id)
 
     # filtered movies based on color and adult
     filtered_movies = movies_meta.query('tmdb_adult == %s' % base_movie_meta['tmdb_adult'].iloc[0])
     filtered_movies = filtered_movies.query('imdb_color == "%s"' % base_movie_meta['imdb_color'].iloc[0])
 
     # filtered movies based on genre
-    movies = genre_filter.get_movies_with_similar_genres(movie_id, n, filtered_movies)
+    movies = genre_filter.get_movies_with_similar_genres(movie_id, n, movies=filtered_movies)
 
     # decrease movies to increase efficiency
     # has not too much impact on the result because genre has the most weight
-    if movies.shape[0] >= (n*20):
-        movies = movies.nlargest(n*20)
+    if movies.shape[0] >= (n * 20):
+        movies = movies.nlargest(n * 20)
 
     merged_movies = pd.merge(pd.DataFrame(movies), filtered_movies, left_index=True, right_index=True)
 
@@ -110,9 +106,9 @@ def recommend_movie_meta(movie_id: int, n: int, popularity_bias: bool = False, u
 
     # same as actors for keywords
     base_keywords = eval(base_movie_meta['tmdb_keywords'].iloc[0])
-    merged_movies['tmdb_keywords_count'] = merged_movies.apply(lambda row:
-                                                          count_elements_in_set(row, base_keywords, 'tmdb_keywords')
-                                                          , axis=1)
+    merged_movies['tmdb_keywords_count'] = merged_movies.apply(
+        lambda row: count_elements_in_set(row, base_keywords, 'tmdb_keywords'), axis=1
+    )
 
     # needed to calculate score: keywords_count / max * keywords_percentage
     max_keywords = merged_movies['tmdb_keywords_count'].max()
@@ -163,10 +159,7 @@ def recommend_movie_meta(movie_id: int, n: int, popularity_bias: bool = False, u
     else:
         results = score
 
-    top_n_results = results.nlargest(n)
-    # export the list of movies
-    results_as_list = top_n_results.index.to_list()
-    return results_as_list
+    return results
 
 
 # function to count the elements in row which are in the base too
@@ -176,6 +169,7 @@ def count_elements_in_list(row: pd.Series, base: list, column: str):
         if element in row[column]:
             count += 1
     return count
+
 
 # function to count the elements in row which are in the base too
 def count_elements_in_set(row: pd.Series, base: list, column: str):

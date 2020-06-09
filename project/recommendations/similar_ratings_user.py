@@ -2,21 +2,19 @@ from typing import List
 
 import pandas as pd
 
+from util.data import Data
 from util.exception import MissingDataException
-from util.data import Data, Column
 
 
-def recommend_movies_popularity_bias(movie_id: int, n: int):
+def recommend_movies_popularity_bias(movie_id: int, n: int = 5):
     return recommend_movies(movie_id, n, filter_below_avg_ratings=True, popularity_bias=True)
 
 
-def recommend_movies_filter_avg(movie_id: int, n: int):
+def recommend_movies_filter_avg(movie_id: int, n: int = 5):
     return recommend_movies(movie_id, n, filter_below_avg_ratings=True)
 
 
-
-
-def recommend_movies(movie_id: int, n: int, filter_below_avg_ratings: bool = False, popularity_bias: bool = False) \
+def recommend_movies(movie_id: int, n: int = 5, filter_below_avg_ratings: bool = False, popularity_bias: bool = False) \
         -> List[int]:
     ratings = Data.ratings()
 
@@ -58,15 +56,4 @@ def recommend_movies(movie_id: int, n: int, filter_below_avg_ratings: bool = Fal
     else:
         results = measures['mean']
 
-    # select the best results (nlargest is significantly faster than sort+head for small n)
-    top_n_results = results.nlargest(n)
-    # export the list of movies
-    results_as_list = top_n_results.index.to_list()
-
-    return results_as_list
-
-
-
-
-
-
+    return results
