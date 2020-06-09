@@ -2,15 +2,16 @@ import pandas as pd
 
 from recommendations.shared.dcg import index_reverse_lookup_dict, dcg_similarity
 from util.data import Data, Column
+from util.data_helper import actors_as_lists
 from util.timer import timer
 
 
 @timer
 def recommend_movies(movie_id: int, n: int):
-    actors: pd.Series = Data.movie_meta()[Column.actors.value]
+    # actors: pd.Series = Data.movie_meta()[Column.actors.value]
     # actors = Data.movie_meta().drop_duplicates(Column.collection.value)[Column.actors.value]
 
-    actors = actors.map(eval)
+    actors: pd.Series = actors_as_lists()
 
     reference_actors_lookup = index_reverse_lookup_dict(actors.loc[movie_id])
 

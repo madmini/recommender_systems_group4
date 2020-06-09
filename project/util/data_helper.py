@@ -1,3 +1,4 @@
+import functools
 from multiprocessing.pool import ThreadPool
 from typing import List, Dict
 
@@ -91,3 +92,8 @@ def avg_rating_for_user(user_id: int) -> float:
     user_ratings: pd.Series = ratings.loc[user_id]
     # calculate average using integrated function
     return user_ratings.mean()
+
+
+@functools.lru_cache()
+def actors_as_lists():
+    return Data.movie_meta()[Column.actors.value].map(eval)
