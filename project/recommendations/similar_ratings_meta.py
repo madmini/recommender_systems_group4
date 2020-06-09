@@ -36,7 +36,6 @@ def recommend_movie_meta(movie_id: int, n: int, popularity_bias: bool = False, u
     # production_countries
     production_countries_percentage = 7
 
-
     # Get movie_meta data and set the index on movie_id
     movies_meta = Data.movie_meta()
     movies_meta = movies_meta.set_index('movielens_id')
@@ -50,6 +49,11 @@ def recommend_movie_meta(movie_id: int, n: int, popularity_bias: bool = False, u
 
     # filtered movies based on genre
     movies = genre_filter.get_movies_with_similar_genres(movie_id, n, filtered_movies)
+
+    # decrease movies to increase efficiency
+    # has not too much impact on the result because genre has the most weight
+    if movies.shape[0] >= (n*20):
+        movies = movies.nlargest(n*20)
 
     merged_movies = pd.merge(pd.DataFrame(movies), filtered_movies, left_index=True, right_index=True)
 
@@ -155,7 +159,7 @@ def recommend_movie_meta(movie_id: int, n: int, popularity_bias: bool = False, u
             # and multiplying the count back in
             # additionally multiply the genre back in
             # to prevent good rated movies with little correlation to the genres
-            results = measures_movies.eval('(mean ** 3) * count * score')
+            results = measures_movies.eval('((mean* score) ** 2) * count')
         else:
             # multiply genre to prevent good rated movies with little correlation to the genres
             results = measures_movies.eval('mean * score')
