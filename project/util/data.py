@@ -40,6 +40,7 @@ class Column(Enum):
     poster_url = 'poster'
     num_ratings = 'numRatings'
     tmdb_similar = 'tmdb_recommendations'
+    collection = 'tmdb_belongs_to_collection'
 
     def __str__(self):
         return self.value
@@ -68,11 +69,11 @@ class File(Enum):
     movie_meta = (
         'movie_meta',
         [Column.movie_id.value, 'tmdb_original_language', Column.keywords.value, 'tmdb_video',
-         'tmdb_title', Column.tmdb_similar.value, 'tmdb_backdrop_path', 'tmdb_revenue', 'tmdb_genres', 'tmdb_popularity',
-         'tmdb_production_countries', 'tmdb_vote_count', 'tmdb_budget', 'tmdb_similar', 'tmdb_original_title',
-         'tmdb_spoken_languages', 'tmdb_production_companies', 'tmdb_vote_average', 'tmdb_belongs_to_collection',
-         Column.tagline.value, 'tmdb_adult', 'tmdb_homepage', 'tmdb_status', 'imdb_country', 'imdb_color',
-         'imdb_budgetCurrency', 'imdb_directors', 'imdb_runtime', 'imdb_writers', 'imdb_originalLanguage',
+         'tmdb_title', Column.tmdb_similar.value, 'tmdb_backdrop_path', 'tmdb_revenue', 'tmdb_genres',
+         'tmdb_popularity', 'tmdb_production_countries', 'tmdb_vote_count', 'tmdb_budget', 'tmdb_similar',
+         'tmdb_original_title', 'tmdb_spoken_languages', 'tmdb_production_companies', 'tmdb_vote_average',
+         Column.collection.value, Column.tagline.value, 'tmdb_adult', 'tmdb_homepage', 'tmdb_status', 'imdb_country',
+         'imdb_color', 'imdb_budgetCurrency', 'imdb_directors', 'imdb_runtime', 'imdb_writers', 'imdb_originalLanguage',
          'imdb_coverLink', 'imdb_genres', 'imdb_productionCompanies', 'imdb_budget', 'languages',
          Column.release_date.value, 'dvdReleaseDate', Column.directors.value, 'runtime', 'movielens_id',
          Column.title.value, 'mpaa', Column.actors.value, Column.imdb_id.value, 'originalTitle', Column.genres.value,
@@ -83,7 +84,8 @@ class File(Enum):
          'tmdb_budget': 'Int64', 'tmdb_revenue': 'Int64',
          'tmdb_vote_count': 'Int16', Column.imdb_id.value: 'str', Column.release_year.value: 'Int16',
          'runtime': 'Int16', 'tmdb_status': 'category', 'mpaa': 'category',
-         'imdb_originalLanguage': 'category', 'imdb_color': 'category', 'imdb_country': 'category'}
+         'imdb_originalLanguage': 'category', 'imdb_color': 'category', 'imdb_country': 'category',
+         Column.collection.value: 'category'}
     )
 
     def __init__(self, filename: str, header: List[str], index: List[str], dtypes: Dict[str, str] = None):
