@@ -4,7 +4,7 @@ from typing import List, Dict, Callable
 import pandas as pd
 
 from recommendations import dummy, reference, \
-    similar_ratings_user, similarity_ml, similar_ratings_meta, similar_ratings_genre, same_actors
+    similiar_movies,similar_ratings_user, similarity_ml, similar_ratings_meta, similar_ratings_genre, same_actors, same_directors
 from util.data_helper import get_movie_meta_for
 from util.exception import MethodNotFoundException
 
@@ -18,6 +18,7 @@ class Method(Enum):
     # Note: if a method has the same internal name as an imported package, its name will hide the package name
 
     # similar user ratings
+    similiarity_movies= ('Combined(Keywords, Genres, Actors, Directors, Year)', similiar_movies.recommend_movies)
     similar_ratings_plain = ('Similar User Ratings', similar_ratings_user.recommend_movies)
     similar_ratings_above_avg = ('Similar above-avg User Ratings', similar_ratings_user.recommend_movies_filter_avg)
     similar_ratings_pop = ('Similar User Ratings + Popularity Bias', similar_ratings_user.recommend_movies_popularity_bias)
@@ -34,6 +35,10 @@ class Method(Enum):
     similar_rating_meta_pop = ('Similarity based on Meta-data + User Bias + Popularity Bias'
                                , similar_ratings_meta.recommend_movies_filter_meta_popularity)
     same_actors = ('Cast', same_actors.recommend_movies)
+
+    same_directors = ('Directors', same_directors.recommend_movies)
+
+
 
     @classmethod
     def default(cls):
@@ -84,5 +89,4 @@ def get_methods(active_method: str = None) -> List[Dict[str, str]]:
         if method.name == active_method or method == active_method:
             method_dict['active'] = True
         methods.append(method_dict)
-
     return methods
