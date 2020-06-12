@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import List, Dict, Callable
+from functools import reduce
 
 import pandas as pd
 
@@ -8,8 +9,12 @@ from recommendations import dummy, reference, \
 from util.data_helper import get_movie_meta_for
 from util.exception import MethodNotFoundException
 
+# to get new results
+recommendation_history=[]
+history_depth=3
 
 class Method(Enum):
+
     dummy = ('dummy', dummy.recommend_movies)
     reference = ('TMDb Recommendations Reference', reference.recommend_movies)
 
@@ -67,9 +72,13 @@ def _recommend_movies(movie_id: int, n: int, method: Method) -> List[Dict]:
     movies: List[int] = [movie_id]
 
     similar = method(movie_id)
-
+    if(len(recommendation_history)>0):
+        similar = similar.drop(reduce(lambda x,y: x+y, recommendation_history), errors='ignore')
     movies.extend(similar.nlargest(n).index)
 
+    recommendation_history.append(movies)
+    if(len(recommendation_history) >= history_depth):
+        recommendation_history.pop(0)
     return get_movie_meta_for(movies)
 
 
