@@ -1,26 +1,12 @@
-import functools
 import os
-import time
 
 import pandas as pd
+
+from util.timer import timer
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 dataset_dir = os.path.join(BASE_DIR, 'datasets')
 data_dir = os.path.join(dataset_dir, 'full_meta')
-
-
-# timer wrapper function, used to find runtime of functions in testing
-def timer(func):
-    @functools.wraps(func)
-    def wrapper_timer(*args, **kwargs):
-        tic = time.perf_counter()
-        value = func(*args, **kwargs)
-        toc = time.perf_counter()
-        elapsed_time = toc - tic
-        print(f"Elapsed time: {elapsed_time:0.4f} seconds")
-        return value
-
-    return wrapper_timer
 
 
 @timer

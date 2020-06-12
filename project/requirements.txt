@@ -1,6 +1,12 @@
-pandas~=1.0.3
-Django~=3.0.6
-simplejson~=3.17.0
-requests~=2.23.0
-numpy~=1.18.4
+# directly used for recommendations
+pandas~=1.0.4
+numpy~=1.18.5
+scikit-learn~=0.23.1
+# full text search
 Whoosh~=2.7.4
+# for pre-processing and generally parsing json
+simplejson~=3.17.0
+# server framework
+Django~=3.0.7
+# for fetching poster urls
+requests~=2.23.0

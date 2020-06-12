@@ -2,13 +2,15 @@ import functools
 from enum import Enum
 from typing import List, Dict, Callable
 
-from recommendations import dummy, similar_ratings_user, similarity_ml, similar_ratings_meta, similar_ratings_genre
+from recommendations import dummy, reference, \
+    similar_ratings_user, similarity_ml, similar_ratings_meta, similar_ratings_genre, same_actors
 from util.data_helper import get_movie_meta_for
 from util.exception import MethodNotFoundException
 
 
 class Method(Enum):
     dummy = ('dummy', dummy.recommend_movies)
+    reference = ('TMDb Recommendations Reference', reference.recommend_movies)
 
     # ADD METHODS HERE
     # internal_method_name = ('Display Name', package.method_name)
@@ -30,6 +32,7 @@ class Method(Enum):
                                 , similar_ratings_meta.recommend_movies_filter_meta_user)
     similar_rating_meta_pop = ('Similarity based on Meta-data + User Bias + Popularity Bias'
                                , similar_ratings_meta.recommend_movies_filter_meta_popularity)
+    same_actors = ('Cast', same_actors.recommend_movies)
 
     @classmethod
     def default(cls):
@@ -56,7 +59,7 @@ class Method(Enum):
 # @functools.lru_cache(maxsize=None, typed=False)
 def _recommend_movies(movie_id: int, n: int, method: Method) -> List[Dict]:
     recommendations: List[int] = [movie_id]
-    recommendations += method(movie_id, n)
+    recommendations.extend(method(movie_id, n))
 
     return get_movie_meta_for(recommendations)
 
