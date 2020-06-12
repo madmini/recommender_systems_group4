@@ -1,7 +1,8 @@
 import pandas as pd
-
 from recommendations import genre_filter
-from util.data import Data
+from util.data import Data, Column
+
+from util.timer import timer
 
 
 def recommend_movies_filter_meta(movie_id: int, n: int = 5):
@@ -16,117 +17,34 @@ def recommend_movies_filter_meta_popularity(movie_id: int, n: int = 5):
     return recommend_movie_meta(movie_id, n, popularity_bias=True, user_bias=True)
 
 
+@timer
 def recommend_movie_meta(movie_id: int, n: int = 5, popularity_bias: bool = False, user_bias: bool = False):
-    # adult
-    # color
-
-    # genre
-    genre_percentage = 35
-    # actor
-    actor_percentage = 20
-    # directors
-    directors_percentage = 8
-    # keywords
-    keywords_percentage = 20
-    # years
-    years_percentage = 10
-    # production_countries
-    production_countries_percentage = 7
-
     # Get movie_meta data and set the index on movie_id
     movies_meta = Data.movie_meta()
-
     # Get the meta data from the base movie
-    base_movie_meta = movies_meta.query('movie_id == %s' % movie_id)
+    base_movie_meta = movies_meta.loc[movie_id, :]
 
     # filtered movies based on color and adult
-    filtered_movies = movies_meta.query('tmdb_adult == %s' % base_movie_meta['tmdb_adult'].iloc[0])
-    filtered_movies = filtered_movies.query('imdb_color == "%s"' % base_movie_meta['imdb_color'].iloc[0])
+    filtered_movies = movies_meta.query('tmdb_adult == {}'.format(base_movie_meta['tmdb_adult']))
+    filtered_movies = filtered_movies.query('imdb_color == "{}"'.format(base_movie_meta['imdb_color']))
 
     # filtered movies based on genre
     movies = genre_filter.get_movies_with_similar_genres(movie_id, n, movies=filtered_movies)
 
-    # decrease movies to increase efficiency
-    # has not too much impact on the result because genre has the most weight
-    if movies.shape[0] >= (n * 20):
-        movies = movies.nlargest(n * 20)
-
+    # merge the number of similar genres back to the main df
     merged_movies = pd.merge(pd.DataFrame(movies), filtered_movies, left_index=True, right_index=True)
+    merged_movies = merged_movies.rename(columns={"{}_x".format(Column.genres.value): Column.genres.value})
 
-    # needed to calculate score: genre_count / max * genre_percentage
-    max_genre = merged_movies[0].max()
+    # preparing data for the score calculation
+    # count similar items in the columns or calculate the difference
+    merged_movies = calculate_column(merged_movies, base_movie_meta, 'actors')
+    merged_movies = calculate_column(merged_movies, base_movie_meta, 'directors')
+    merged_movies = calculate_column(merged_movies, base_movie_meta, 'tmdb_keywords')
+    merged_movies = calculate_column(merged_movies, base_movie_meta, 'tmdb_production_countries')
+    merged_movies = calculate_column(merged_movies, base_movie_meta, 'release_year', year=True)
 
-    # transform string into list and count the actors which are in the base and the rows
-    base_actors = eval(base_movie_meta['actors'].iloc[0])
-    merged_movies['actor_count'] = merged_movies.apply(lambda row:
-                                                       count_elements_in_set(row, base_actors, 'actors')
-                                                       , axis=1)
-
-    # needed to calculate score: actor_count / max * actor_percentage
-    max_actor = merged_movies['actor_count'].max()
-
-    # for preventing divide by 0 error
-    if max_actor == 0:
-        max_actor = 1
-
-    # same as actors for directors
-    base_directors = eval(base_movie_meta['directors'].iloc[0])
-    merged_movies['director_count'] = merged_movies.apply(lambda row:
-                                                          count_elements_in_set(row, base_directors, 'directors')
-                                                          , axis=1)
-
-    # needed to calculate score: director_count / max * director_percentage
-    max_director = merged_movies['director_count'].max()
-
-    # for preventing divide by 0 error
-    if max_director == 0:
-        max_director = 1
-
-    # calculating year difference, result is normally between [-infinity,1]
-    # 1 if it has the same year
-    # below 0 if the difference is more than base year * 2
-    merged_movies['year_difference'] \
-        = (base_movie_meta['release_year'].iloc[0]
-           - abs(merged_movies['release_year'] - base_movie_meta['release_year'].iloc[0])) \
-          / base_movie_meta['release_year'].iloc[0]
-
-    # same as actors for production countries
-    base_production_countries = eval(base_movie_meta['tmdb_production_countries'].iloc[0])
-    merged_movies['tmdb_production_countries_count'] \
-        = merged_movies.apply(lambda row:
-                              count_elements_in_set(row, base_production_countries, 'tmdb_production_countries')
-                              , axis=1)
-
-    # needed to calculate score: production_countries_count / max * production_countries_percentage
-    max_production_countries = merged_movies['tmdb_production_countries_count'].max()
-
-    # for preventing divide by 0 error
-    if max_production_countries == 0:
-        max_production_countries = 1
-
-    # same as actors for keywords
-    base_keywords = eval(base_movie_meta['tmdb_keywords'].iloc[0])
-    merged_movies['tmdb_keywords_count'] = merged_movies.apply(
-        lambda row: count_elements_in_set(row, base_keywords, 'tmdb_keywords'), axis=1
-    )
-
-    # needed to calculate score: keywords_count / max * keywords_percentage
-    max_keywords = merged_movies['tmdb_keywords_count'].max()
-
-    # for preventing divide by 0 error
-    if max_keywords == 0:
-        max_keywords = 1
-
-    # calculate score between [0,100]
-    # 100 if its the same movie
-    # 0 if nothing is similar
-    # below 0 if the year difference is too damn high xD
-    score = merged_movies['actor_count'] / max_actor * actor_percentage\
-            + merged_movies['director_count'] / max_director * directors_percentage\
-            + merged_movies['year_difference'] * years_percentage\
-            + merged_movies['tmdb_keywords_count'] / max_keywords * keywords_percentage\
-            + merged_movies['tmdb_production_countries_count'] / max_production_countries * production_countries_percentage\
-            + merged_movies[0] / max_genre * genre_percentage
+    # score calculation
+    score = compute_score(merged_movies)
 
     # calculate the ranking with the avg user rating
     if user_bias:
@@ -172,6 +90,95 @@ def count_elements_in_list(row: pd.Series, base: list, column: str):
 
 
 # function to count the elements in row which are in the base too
-def count_elements_in_set(row: pd.Series, base: list, column: str):
-    actors = eval(row[column])
+def count_elements_in_set(row: list, base: list):
+    actors = eval(row)
     return len((set(base).intersection(actors)))
+
+
+def calculate_year_value(row: int, base: int):
+    if pd.isna(row):
+        return 0
+    diff = abs(row - base)
+    if diff >= 10:
+        return 0
+    if diff == 0:
+        return 1
+    return 1 / diff
+
+
+@timer
+def compute_score(df: pd.DataFrame):
+    # genre
+    genre_percentage = 35
+    # actor
+    actor_percentage = 20
+    # directors
+    directors_percentage = 8
+    # keywords
+    keywords_percentage = 20
+    # years
+    years_percentage = 10
+    # production_countries
+    production_countries_percentage = 7
+
+    df = df[['genres', 'actors', 'directors', 'tmdb_production_countries', 'tmdb_keywords', 'release_year']]
+
+    # max is needed to calculate the score
+    max_genre = df['genres'].max()
+    max_actor = df['actors'].max()
+    max_director = df['directors'].max()
+    max_production_countries = df['tmdb_production_countries'].max()
+    max_keywords = df['tmdb_keywords'].max()
+
+    # for preventing divide by 0 error
+    if max_keywords == 0:
+        max_keywords = 1
+    # for preventing divide by 0 error
+    if max_director == 0:
+        max_director = 1
+    # for preventing divide by 0 error
+    if max_production_countries == 0:
+        max_production_countries = 1
+    # for preventing divide by 0 error
+    if max_actor == 0:
+        max_actor = 1
+
+    # calculate score between [0,100]
+    # 100 if its the same movie
+    # 0 if nothing is similar
+    score = df['actors'] / max_actor * actor_percentage \
+            + df['directors'] / max_director * directors_percentage \
+            + df['release_year'] * years_percentage \
+            + df['tmdb_keywords'] / max_keywords * keywords_percentage \
+            + df['tmdb_production_countries'] \
+            / max_production_countries * production_countries_percentage \
+            + df['genres'] / max_genre * genre_percentage
+    return score
+
+
+@timer
+def calculate_column(df: pd.DataFrame, base: pd.Series, column: str, year: bool = False):
+    df_column = df[column]
+
+    # year value is 1/abs(difference between row and base)
+    # if it the difference is bigger than 10 than it is 0
+    # if it is not a number it is 0 too
+    # the year value is between 0 and 1
+    if year:
+        base = base[column]
+        df_column = df_column.apply(
+            lambda row: calculate_year_value(row, base)
+        )
+    # count how many base list items are in the row list
+    else:
+        base = eval(base[column])
+        df_column = df_column.apply(
+            lambda row: count_elements_in_set(row, base)
+        )
+
+    # merge them back and rename it (to remove the suffix "_x"
+    # to select the column and merge it afterwards is faster than to work with the whole df
+    # even if you only look at one column
+    df = pd.merge(pd.DataFrame(df_column), df, left_index=True, right_index=True)
+    df = df.rename(columns={"{}_x".format(column): column}, errors="raise")
+    return df
