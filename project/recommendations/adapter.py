@@ -3,13 +3,14 @@ from enum import Enum
 from typing import List, Dict, Callable
 
 from recommendations import dummy, reference, \
-    similar_ratings_user, similarity_ml, similar_ratings_meta, similar_ratings_genre, same_actors
+    similar_ratings_user, similarity_ml, similar_ratings_meta, similar_ratings_genre, same_actors, all
 from util.data_helper import get_movie_meta_for
 from util.exception import MethodNotFoundException
 
 
 class Method(Enum):
     dummy = ('dummy', dummy.recommend_movies)
+    all = ('all', all.recommend_movies)
     reference = ('TMDb Recommendations Reference', reference.recommend_movies)
 
     # ADD METHODS HERE
