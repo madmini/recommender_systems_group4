@@ -1,14 +1,20 @@
-import functools
 from enum import Enum
 from typing import List, Dict, Callable
+from functools import reduce
+
+import pandas as pd
 
 from recommendations import dummy, reference, \
-    similar_ratings_user, similarity_ml, similar_ratings_meta, similar_ratings_genre, same_actors
+    similiar_movies,similar_ratings_user, similarity_ml, similar_ratings_meta, similar_ratings_genre, same_actors, same_directors
 from util.data_helper import get_movie_meta_for
 from util.exception import MethodNotFoundException
 
+# to get new results
+recommendation_history=[]
+history_depth=3
 
 class Method(Enum):
+
     dummy = ('dummy', dummy.recommend_movies)
     reference = ('TMDb Recommendations Reference', reference.recommend_movies)
 
@@ -17,6 +23,7 @@ class Method(Enum):
     # Note: if a method has the same internal name as an imported package, its name will hide the package name
 
     # similar user ratings
+    similiarity_movies= ('Combined(Keywords, Genres, Actors, Directors, Year)', similiar_movies.recommend_movies)
     similar_ratings_plain = ('Similar User Ratings', similar_ratings_user.recommend_movies)
     similar_ratings_above_avg = ('Similar above-avg User Ratings', similar_ratings_user.recommend_movies_filter_avg)
     similar_ratings_pop = ('Similar User Ratings + Popularity Bias', similar_ratings_user.recommend_movies_popularity_bias)
@@ -34,11 +41,15 @@ class Method(Enum):
                                , similar_ratings_meta.recommend_movies_filter_meta_popularity)
     same_actors = ('Cast', same_actors.recommend_movies)
 
+    same_directors = ('Directors', same_directors.recommend_movies)
+
+
+
     @classmethod
     def default(cls):
         return cls.dummy
 
-    def __init__(self, name: str, method: Callable[[int, int], List[int]]):
+    def __init__(self, name: str, method: Callable[[int], pd.Series]):
         # note: the field 'name' is reserved for enums
         self.display_name = name
         self.method = method
@@ -58,10 +69,17 @@ class Method(Enum):
 
 # @functools.lru_cache(maxsize=None, typed=False)
 def _recommend_movies(movie_id: int, n: int, method: Method) -> List[Dict]:
-    recommendations: List[int] = [movie_id]
-    recommendations.extend(method(movie_id, n))
+    movies: List[int] = [movie_id]
 
-    return get_movie_meta_for(recommendations)
+    similar = method(movie_id)
+    if(len(recommendation_history)>0):
+        similar = similar.drop(reduce(lambda x,y: x+y, recommendation_history), errors='ignore')
+    movies.extend(similar.nlargest(n).index)
+
+    recommendation_history.append(movies)
+    if(len(recommendation_history) >= history_depth):
+        recommendation_history.pop(0)
+    return get_movie_meta_for(movies)
 
 
 def recommend_movies(movie_id: int, n: int, method_name: str = None, method: Method = None):
@@ -80,5 +98,4 @@ def get_methods(active_method: str = None) -> List[Dict[str, str]]:
         if method.name == active_method or method == active_method:
             method_dict['active'] = True
         methods.append(method_dict)
-
     return methods
