@@ -98,13 +98,11 @@ def avg_rating_for_user(user_id: int) -> float:
 def actors_as_lists():
     return Data.movie_meta()[Column.actors.value].map(eval)
 
+
 @functools.lru_cache()
 def directors_as_lists():
     return Data.movie_meta()[Column.directors.value].map(eval)
 
-@functools.lru_cache()
-def get_releaseyears():
-    return Data.movie_meta()[Column.release_year.value]
 
 @functools.lru_cache()
 def get_genre_as_lists():

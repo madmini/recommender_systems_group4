@@ -1,4 +1,4 @@
-from recommendations import genre_filter
+from recommendations.strategies.shared import genre_filter
 
 
 def recommend_movies_filter_genre(movie_id: int, n: int = 5):

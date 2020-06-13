@@ -1,6 +1,7 @@
 # directly used for recommendations
 pandas~=1.0.4
 numpy~=1.18.5
+scipy~=1.4.1
 scikit-learn~=0.23.1
 # full text search
 Whoosh~=2.7.4

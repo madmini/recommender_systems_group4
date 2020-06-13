@@ -4,7 +4,7 @@ from util.data import Data, Column
 from util.data_helper import get_movielens_id
 
 
-def recommend_movies(movie_id: int, n: int = None):
+def tmdb_reference(movie_id: int, n: int = None):
     movie = Data.movie_meta().loc[movie_id]
     similar_tmdb = eval(movie[Column.tmdb_similar.value])
 

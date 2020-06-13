@@ -1,12 +1,8 @@
 import pandas as pd
-from recommendations import genre_filter
+
+from recommendations.strategies.shared import genre_filter
 from util.data import Data, Column
-
 from util.timer import timer
-
-
-def recommend_movies_filter_meta(movie_id: int, n: int = 5):
-    return recommend_movie_meta(movie_id, n)
 
 
 def recommend_movies_filter_meta_user(movie_id: int, n: int = 5):

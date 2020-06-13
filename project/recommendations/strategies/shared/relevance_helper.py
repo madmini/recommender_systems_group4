@@ -1,8 +1,11 @@
 from util import data_helper
 
+from util.data import Data, Column
+
+
 # returns relative value for the difference in release years
 def get_year_relevance(movie_id:int):
-    release_years= data_helper.get_releaseyears()
+    release_years= Data.movie_meta()[Column.release_year.value]
     movie_year=release_years.loc[movie_id]
     release_years = release_years.subtract(movie_year)
     release_years = release_years.abs()

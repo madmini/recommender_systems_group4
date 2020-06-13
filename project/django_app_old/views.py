@@ -2,6 +2,7 @@ from django.http import Http404
 from django.shortcuts import render, redirect
 
 from recommendations.adapter import *
+from recommendations.method import Method
 from util.exception import MovieNotFoundException, MethodNotFoundException, MissingDataException
 
 

@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 
 # Create your views here.
-from recommendations.adapter import recommend_movies, get_methods, Method
+from recommendations.adapter import recommend_movies, get_methods
+from recommendations.method import Method
 from util.search import Search
 
 
