@@ -1,2 +1,3 @@
-# recommender_systems_group4
-repository where we collaborate for recommender systems
+# Recommendation Systems Group 4 Repository
+
+[Assignment 7 (Project) Readme](project/README.md)
