@@ -5,12 +5,13 @@ import pandas as pd
 
 from recommendations.strategies import users_who_enjoy_this_also_like, similarity_ml, cast_and_crew, \
     similar_ratings_genre, similar_ratings_meta, similiar_movies
-from recommendations.strategies.dummy import reference, dummy
+from recommendations.strategies.dummy import reference, dummy, sequel
 
 
 class Method(Enum):
     dummy = ('dummy', dummy.sample)
     reference = ('TMDb Recommendations Reference', reference.tmdb_reference)
+    sequels = ('Sequels', sequel.sequels)
 
     # ADD METHODS HERE
     # internal_method_name = ('Display Name', package.method_name)
