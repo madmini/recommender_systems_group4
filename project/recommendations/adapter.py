@@ -26,7 +26,8 @@ class Method(Enum):
     similiarity_movies= ('Combined(Keywords, Genres, Actors, Directors, Year)', similiar_movies.recommend_movies)
     similar_ratings_plain = ('Similar User Ratings', similar_ratings_user.recommend_movies)
     similar_ratings_above_avg = ('Similar above-avg User Ratings', similar_ratings_user.recommend_movies_filter_avg)
-    similar_ratings_pop = ('Similar User Ratings + Popularity Bias', similar_ratings_user.recommend_movies_popularity_bias)
+    similar_ratings_pop = (
+    'Similar User Ratings + Popularity Bias', similar_ratings_user.recommend_movies_popularity_bias)
     similarity_ml = ('ML', similarity_ml.recommend_movies)
     similar_rating_genre = ('Similar Genres Rating', similar_ratings_genre.recommend_movies_filter_genre)
     similar_rating_genre_user = ('Similar Genres Rating + User Bias'
