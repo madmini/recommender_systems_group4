@@ -1,14 +1,16 @@
-from typing import List
-from util.timer import timer
 import pandas as pd
 
-from util.exception import MissingDataException
-from util.data import Data, Column
+from util.data import Column, Data
+from util.timer import timer
+
 
 @timer
 def get_movies_with_similar_genres(movie_id: int, n: int = 5, popularity_bias: bool = False
                                    , user_bias: bool = False, movies: pd.DataFrame = None):
     # Get all movies and split them into the base movie and the rest
+
+    if n is None:
+        n = 5
 
     # Use the preferred movie df
     if movies is None:

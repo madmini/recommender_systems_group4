@@ -5,7 +5,9 @@ import pandas as pd
 
 from recommendations.strategies import users_who_enjoy_this_also_like, similarity_ml, cast_and_crew, \
     similar_ratings_genre, similar_ratings_meta, similiar_movies
+from recommendations.strategies.combined import Combined
 from recommendations.strategies.dummy import reference, dummy, sequel
+from recommendations.strategies.slot_based import SlotBased
 
 
 class Method(Enum):
@@ -69,6 +71,16 @@ class Method(Enum):
     same_directors = (
         'Directors',
         cast_and_crew.same_directors
+    )
+    slot_based_test = (
+        'Slots',
+        SlotBased([similar_ratings_genre.recommend_movies_filter_genre_popularity_bias, cast_and_crew.same_actors,
+                   cast_and_crew.same_directors], [2, 2, 2])
+    )
+    combined_test = (
+        'Combined',
+        Combined([similar_ratings_genre.recommend_movies_filter_genre_popularity_bias, cast_and_crew.same_actors,
+                  cast_and_crew.same_directors])
     )
 
     def __init__(self, name: str, method: Callable[[int], pd.Series]):

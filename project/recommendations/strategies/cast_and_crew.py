@@ -15,12 +15,12 @@ def apply_dcg_to_series(movie_id: int, data: pd.Series):
 
 
 @timer
-def same_actors(movie_id: int, n: int = None):
+def same_actors(movie_id: int, n: int = 5):
     actors: pd.Series = actors_as_lists()
     return apply_dcg_to_series(movie_id, actors)
 
 
 @timer
-def same_directors(movie_id: int, n: int = None):
+def same_directors(movie_id: int, n: int = 5):
     directors: pd.Series = directors_as_lists()
     return apply_dcg_to_series(movie_id, directors)

@@ -3,7 +3,7 @@ from recommendations.strategies import similarity_ml, cast_and_crew
 from recommendations.strategies.shared import relevance_helper
 
 
-def recommend_movies(movie_id: int, n: int= None,keywords_ml_importance:float=1.0,genre_importance:float=0.8, actors_importance:float=0.1,directors_importance=0.1, year_importance=0.05):
+def recommend_movies(movie_id: int, n: int = 5,keywords_ml_importance:float=1.0,genre_importance:float=0.8, actors_importance:float=0.1,directors_importance=0.1, year_importance=0.05):
     calculations_df= recommendations.strategies.cast_and_crew.same_directors(movie_id, n).to_frame()
     calculations_df['actors']= cast_and_crew.same_actors(movie_id, n).values
     calculations_df['keywords']= similarity_ml.TfIdfSimilarity.recommend(movie_id, n)
