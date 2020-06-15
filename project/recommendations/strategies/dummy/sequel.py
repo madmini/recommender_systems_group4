@@ -6,11 +6,11 @@ from recommendations.filters.collection import get_collection
 def sequels(movie_id: int, n: int = 5) -> pd.Series:
     # get the movies that are in the same collection
     # then extract a slice starting at the base movie (exclusive)
-    c = get_collection(movie_id).loc[movie_id + 1:]
+    c = get_collection(movie_id).loc[movie_id:].drop(index=movie_id)
     # put the list of movies in the right format by extracting the index
     return pd.Series(data=range(len(c), 0, -1), index=c.index)
 
 
 def prequels(movie_id: int, n: int = 5) -> pd.Series:
-    c = get_collection(movie_id).loc[:movie_id - 1]
+    c = get_collection(movie_id).loc[:movie_id].drop(index=movie_id)
     return pd.Series(data=range(len(c), 0, -1), index=c.index)
