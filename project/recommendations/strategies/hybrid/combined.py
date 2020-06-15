@@ -32,7 +32,8 @@ class Combined:
             if not self.multiplicative:
                 factor = weight
             if self.normalize:
-                factor /= score.max()
+                if score.max()!=0:
+                    factor /= score.max()
 
             score *= factor
 

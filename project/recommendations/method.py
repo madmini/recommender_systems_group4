@@ -9,6 +9,8 @@ from recommendations.strategies.hybrid.combined import Combined
 from recommendations.strategies.dummy import reference, dummy, sequel
 from recommendations.strategies.tf_idf import TfIdfSimilarity
 from recommendations.strategies.hybrid.slot_based import SlotBased
+from recommendations.strategies.shared import relevance_helper
+
 from util.data import Column
 
 
@@ -87,6 +89,30 @@ class Method(Enum):
         'Combined',
         Combined([similar_ratings_genre.recommend_movies_filter_genre_popularity_bias, cast_and_crew.same_actors,
                   cast_and_crew.same_directors])
+    )
+
+    combined_similar_movies_nosummary_notnormalized = (
+        'similar movies - no summary -not normalized',
+        Combined([TfIdfSimilarity(Column.keywords),
+                  cast_and_crew.same_actors, cast_and_crew.same_directors,
+                  relevance_helper.get_genre_overlap_values, relevance_helper.get_year_relevance],
+                 [1.0,0.1,0.1,0.8,0.05], normalize=False)
+    )
+
+    combined_similar_movies_nosummary = (
+        'similar movies - no summary',
+        Combined([TfIdfSimilarity(Column.keywords),
+                  cast_and_crew.same_actors, cast_and_crew.same_directors,
+                  relevance_helper.get_genre_overlap_values, relevance_helper.get_year_relevance],
+                 [1.0, 0.1, 0.1, 0.8, 0.05])
+    )
+
+    combined_all_columns =(
+        'similar movies - all columns',
+        Combined([TfIdfSimilarity(Column.keywords), TfIdfSimilarity(Column.summary),
+                  cast_and_crew.same_actors,cast_and_crew.same_directors,
+                  relevance_helper.get_genre_overlap_values, relevance_helper.get_year_relevance],
+                 [10,7, 4, 2, 6, 1])
     )
 
     def __init__(self, name: str, method: Callable[[int], pd.Series]):
