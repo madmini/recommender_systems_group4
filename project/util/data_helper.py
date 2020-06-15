@@ -107,3 +107,11 @@ def directors_as_lists():
 @functools.lru_cache()
 def get_genre_as_lists():
     return Data.movie_meta()[Column.genres.value].map(eval)
+
+
+@functools.lru_cache()
+def get_normalized_popularity():
+    popularity = Data.movie_meta()[Column.num_ratings.value]
+    popularity **= (1 / 10)
+    popularity /= popularity.max()
+    return popularity

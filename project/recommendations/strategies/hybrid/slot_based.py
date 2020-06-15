@@ -18,17 +18,11 @@ class SlotBased:
             method_scores = method_result.nlargest(self.total_slots).index.tolist()
             scores.append(method_scores)
 
-        print(scores)
-
         self._remove_duplicates(scores, self.slots)
-
-        print(scores)
 
         result = []
         for scores_a, slots_a in zip(scores, self.slots):
             result.extend(scores_a[:slots_a])
-
-        print(result)
 
         return pd.Series(data=range(len(result), 0, -1), index=result)
 
