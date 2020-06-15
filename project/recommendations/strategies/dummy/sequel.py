@@ -1,6 +1,6 @@
 import pandas as pd
 
-from recommendations.collection import get_collection
+from recommendations.filters.collection import get_collection
 
 
 def sequels(movie_id: int, n: int = 5) -> pd.Series:

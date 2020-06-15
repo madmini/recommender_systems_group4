@@ -9,8 +9,17 @@ from util.data import Data, Column
 
 
 class TfIdfSimilarity:
+    """ Calculates similarity over a column as cosine similarity over TF-IDF. """
+
     tf_idf = TfidfVectorizer(stop_words='english')
     similarity_matrices: Dict[str, csr_matrix] = dict()
+
+    def __init__(self, column: Column = Column.keywords):
+        # use str(field) instead of field.value here to ensure compatibility with direct str inputs
+        self.colname = str(column)
+
+    def __call__(self, movie_id: int, n: int = 5) -> pd.Series:
+        return self.get_similarities_for(movie_id, self.colname)
 
     @classmethod
     def calculate_similarities(cls, colname: str, overwrite_existing: bool = False):
@@ -41,7 +50,3 @@ class TfIdfSimilarity:
         series = pd.Series(index=Data.movie_meta().index, data=similarities)
 
         return series.drop(movie_id)
-
-    @classmethod
-    def recommend(cls, movie_id: int, n: int = 5) -> pd.Series:
-        return cls.get_similarities_for(movie_id, Column.keywords.value)

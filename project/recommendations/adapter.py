@@ -2,7 +2,7 @@ from typing import List, Dict
 
 from pandas import Series
 
-from recommendations.history import History
+from recommendations.filters.history import History
 from recommendations.method import Method
 from util.data_helper import get_movie_meta_for
 from util.exception import MethodNotFoundException

@@ -3,11 +3,13 @@ from typing import Callable
 
 import pandas as pd
 
-from recommendations.strategies import users_who_enjoy_this_also_like, similarity_ml, cast_and_crew, \
+from recommendations.strategies import users_who_enjoy_this_also_like, cast_and_crew, \
     similar_ratings_genre, similar_ratings_meta, similiar_movies
-from recommendations.strategies.combined import Combined
+from recommendations.strategies.hybrid.combined import Combined
 from recommendations.strategies.dummy import reference, dummy, sequel
-from recommendations.strategies.slot_based import SlotBased
+from recommendations.strategies.tf_idf import TfIdfSimilarity
+from recommendations.strategies.hybrid.slot_based import SlotBased
+from util.data import Column
 
 
 class Method(Enum):
@@ -38,7 +40,11 @@ class Method(Enum):
     )
     similarity_ml = (
         'ML',
-        similarity_ml.TfIdfSimilarity.recommend
+        TfIdfSimilarity(Column.keywords)
+    )
+    similarity_ml2 = (
+        'ML Summary',
+        TfIdfSimilarity(Column.summary)
     )
     similar_rating_genre = (
         'Similar Genres Rating',
