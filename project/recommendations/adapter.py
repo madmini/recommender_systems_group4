@@ -18,6 +18,9 @@ def _recommend_movies(movie_id: int, n: int, method: Method) -> List[Dict]:
     # and filter out any movies that were recommended recently
     scores = History.filter(scores)
 
+    if method == Method.reference or method == Method.sequels:
+        n = 20
+
     # movies = [base_movie, ...recommendations]
     movies.extend(scores.nlargest(n).index)
     # add recommendations for movies

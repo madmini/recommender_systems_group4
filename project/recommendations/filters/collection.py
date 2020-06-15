@@ -53,3 +53,18 @@ def get_collection_mask(movie_id: int, df: pd.DataFrame = None):
     collection = df.loc[movie_id][Column.collection.value]
 
     return df[Column.collection.value] == collection
+
+
+class CollectionFilter:
+    def __init__(self, method):
+        self.method = method
+
+    def __call__(self, movie_id: int, n: int = 5):
+        meta = Data.movie_meta()
+        collection = meta[get_collection_mask(movie_id, meta)].index.values
+
+        results: pd.Series = self.method(movie_id, n + 10)
+
+        results = results.drop(collection, errors='ignore')
+
+        return results

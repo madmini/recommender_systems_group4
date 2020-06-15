@@ -41,6 +41,8 @@ class Column(Enum):
     num_ratings = 'numRatings'
     tmdb_similar = 'tmdb_recommendations'
     collection = 'tmdb_belongs_to_collection'
+    tag_id = 'tag_id'
+    relevance = 'relevance'
 
     def __str__(self):
         return self.value
@@ -86,6 +88,11 @@ class File(Enum):
          'runtime': 'Int16', 'tmdb_status': 'category', 'mpaa': 'category',
          'imdb_originalLanguage': 'category', 'imdb_color': 'category', 'imdb_country': 'category',
          Column.collection.value: 'category'}
+    )
+    tag_genome = (
+        'genome-scores',
+        [Column.movie_id.value, Column.tag_id.value, Column.relevance.value],
+        [Column.movie_id.value, Column.tag_id.value]
     )
 
     def __init__(self, filename: str, header: List[str], index: List[str], dtypes: Dict[str, str] = None):
@@ -285,3 +292,23 @@ class Data:
             cls.movies()
         elif f == File.movie_meta:
             cls.movie_meta()
+
+    @classmethod
+    def tag_genome(cls):
+        if cls.__file_paths is None:
+            cls.init()
+
+        file = File.tag_genome
+
+        if file not in cls.__file_paths:
+            return None
+
+        path = cls.__file_paths[file]
+
+        if file not in cls.__cache:
+            cls.__cache[file] = pd.read_csv(
+                path, engine='c', names=file.header, header=0
+            )
+            cls.__cache[file].set_index(keys=file.index, inplace=True)
+
+        return cls.__cache[file]

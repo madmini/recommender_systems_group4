@@ -32,18 +32,21 @@ class Combined:
             if not self.multiplicative:
                 factor = weight
             if self.normalize:
-                if score.max()!=0:
-                    factor /= score.max()
+                normalize_factor = score.max()
+                if normalize_factor != 0:
+                    factor /= normalize_factor
 
             score *= factor
+
+            score = score.fillna(0)
 
             if result is None:
                 result = score
             else:
                 if self.multiplicative:
-                    result *= score
+                    result = result.mul(score, fill_value=0)
                 else:
-                    result += score
+                    result = result.add(score, fill_value=0)
 
         if not self.multiplicative:
             # normalize results

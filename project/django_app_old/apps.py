@@ -7,4 +7,4 @@ class DjangoOldAppConfig(AppConfig):
     name = 'django_app_old'
 
     def ready(self):
-        Data.init(ml_path='ml-latest-small', preload_files=True)
+        pass

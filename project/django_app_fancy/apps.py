@@ -7,4 +7,5 @@ class DjangoFancyAppConfig(AppConfig):
     name = 'django_app_fancy'
 
     def ready(self):
-        Data.init(ml_path='ml-latest-small', preload_files=True)
+        # Data.init(ml_path='ml-latest-small', preload_files=True)
+        Data.init(preload_files=True)
