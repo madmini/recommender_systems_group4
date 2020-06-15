@@ -5,7 +5,7 @@ import pandas as pd
 
 from recommendations.filters.popularity import PopularityBias
 from recommendations.strategies import users_who_enjoy_this_also_like, cast_and_crew, \
-    common_genres, meta_mix, similiar_movies
+    common_genres, meta_mix
 from recommendations.strategies.hybrid.combined import Combined
 from recommendations.strategies.dummy import reference, dummy, sequel
 from recommendations.strategies.tf_idf import TfIdfSimilarity
@@ -24,11 +24,6 @@ class Method(Enum):
     # internal_method_name = ('Display Name', package.method_name)
     # Note: if a method has the same internal name as an imported package, its name will hide the package name
 
-    # similar user ratings
-    similarity_movies = (
-        'Combined(Keywords, Genres, Actors, Directors, Year)',
-        similiar_movies.recommend_movies
-    )
     similar_ratings_plain = (
         'Similar User Ratings',
         users_who_enjoy_this_also_like.recommend_movies
@@ -118,7 +113,11 @@ class Method(Enum):
         Combined([TfIdfSimilarity(Column.keywords), TfIdfSimilarity(Column.summary),
                   cast_and_crew.same_actors,cast_and_crew.same_directors,
                   relevance_helper.get_genre_overlap_values, relevance_helper.get_year_relevance],
-                 [10,7, 4, 2, 6, 1])
+                 [9,7, 4, 2, 6, 1])
+    )
+    combined_all_columns_bias = (
+        'similar movies - all columns -biased',
+        PopularityBias(combined_all_columns[1],score_weight=2)
     )
 
     def __init__(self, name: str, method: Callable[[int], pd.Series]):
