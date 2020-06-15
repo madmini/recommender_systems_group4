@@ -9,7 +9,7 @@ def get_year_relevance(movie_id:int):
     movie_year=release_years.loc[movie_id]
     release_years = release_years.subtract(movie_year)
     release_years = release_years.abs()
-    release_years=release_years.div(release_years.max())
+    release_years=1-release_years.div(release_years.max())
     return release_years.drop(movie_id)
 
 # returns relative value for the genre-overlap (1 = same genres, missing genres decrease the value)
