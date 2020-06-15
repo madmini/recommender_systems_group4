@@ -154,4 +154,4 @@ class Method(Enum):
 
     @classmethod
     def default(cls):
-        return cls.reference
+        return next(iter(cls))
