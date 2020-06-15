@@ -49,14 +49,13 @@ def search(request, query: str = None):
 
 
 def test(request):
-    request.session['method'] = 'reference'
     if 'method' in request.session:
         method = request.session['method']
     else:
         method = Method.default().name
         request.session['method'] = method
 
-    movies = recommend_movies(movie_id=1, n=5, method_name='reference')
+    movies = recommend_movies(movie_id=1, n=5, method_name=method)
 
     return render(request, 'movie/recommendations.html', context={
         'movies': movies,
