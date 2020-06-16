@@ -20,9 +20,13 @@
                     <p class="lead">{{ movie.genres }}</p>
                 </div>
                 <div class="lead mt-4 mb-2">
-                    <a class="btn btn-primary btn-lg" role="button"
+                    <a class="btn btn-primary btn-lg{% if active and mode == 'recommend' %} disabled{% endif %}" role="button"
                        href="{% url 'recommend_default' movie_id=movie.movielens_id %}">
-                        More like this
+                        {% if active and mode == 'recommend' %}
+                            Choose from recommendations
+                        {% else %}
+                            More like this
+                        {% endif %}
                     </a>
                 </div>
             </div>

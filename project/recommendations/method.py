@@ -6,10 +6,11 @@ import pandas as pd
 from recommendations.filters.collection import CollectionFilter
 from recommendations.filters.popularity import PopularityBias
 from recommendations.strategies import users_who_enjoy_this_also_like, cast_and_crew, common_genres, meta_mix
-from recommendations.strategies.dummy import reference, dummy, sequel
+from recommendations.strategies.dummy import reference, sequel
 from recommendations.strategies.hybrid.combined import Combined
 from recommendations.strategies.hybrid.slot_based import SlotBased
 from recommendations.strategies.shared import relevance_helper
+from recommendations.strategies.tag_genome import TagGenome
 from recommendations.strategies.tf_idf import TfIdfSimilarity
 from util.data import Column
 
@@ -134,6 +135,11 @@ class Method(Enum):
         'TF-IDF + Crew + Genres + Release Year (with popularity bias)',
         PopularityBias(combined_all_columns[1], score_weight=2)
     )
+
+    # tag_genome = (
+    #     'Tag Genome',
+    #     TagGenome()
+    # )
 
     def __init__(self, name: str, method: Callable[[int], pd.Series]):
         # note: the field 'name' is reserved for enums

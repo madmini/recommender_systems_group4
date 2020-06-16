@@ -5,7 +5,7 @@ provides a load functions
 """
 import os
 from enum import Enum
-from typing import List, Dict
+from typing import List, Dict, Union
 
 import pandas as pd
 
@@ -92,7 +92,8 @@ class File(Enum):
     tag_genome = (
         'genome-scores',
         [Column.movie_id.value, Column.tag_id.value, Column.relevance.value],
-        [Column.movie_id.value, Column.tag_id.value]
+        [Column.movie_id.value, Column.tag_id.value],
+        {Column.relevance.value: 'float32'}
     )
 
     def __init__(self, filename: str, header: List[str], index: List[str], dtypes: Dict[str, str] = None):
@@ -109,7 +110,7 @@ class Data:
     __ml_path: str = None
 
     __file_paths: Dict[File, str] = None
-    __cache: Dict[File, pd.DataFrame] = None
+    __cache: Dict[File, Union[pd.DataFrame, pd.Series]] = None
 
     @classmethod
     @synchronized
@@ -294,7 +295,7 @@ class Data:
             cls.movie_meta()
 
     @classmethod
-    def tag_genome(cls):
+    def tag_genome(cls) -> pd.Series:
         if cls.__file_paths is None:
             cls.init()
 
@@ -306,9 +307,9 @@ class Data:
         path = cls.__file_paths[file]
 
         if file not in cls.__cache:
-            cls.__cache[file] = pd.read_csv(
-                path, engine='c', names=file.header, header=0
-            )
-            cls.__cache[file].set_index(keys=file.index, inplace=True)
+            df = pd.read_csv(path, engine='c', names=file.header, header=0, dtype=file.dtypes)
+            df.set_index(keys=file.index, inplace=True)
+            pt = pd.pivot_table(df, index=Column.movie_id.value, columns=Column.tag_id.value)
+            cls.__cache[file] = pt
 
         return cls.__cache[file]
