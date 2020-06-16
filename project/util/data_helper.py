@@ -26,6 +26,10 @@ def get_movie_meta_for(movie_ids: List[int]) -> List[Dict]:
     # orientation='records' results in [{'col1': 'val1', 'col2': 'val2'}, {'col1': 'val1', ..}]
     meta_dict: List[Dict] = meta.to_dict(orient='records')
 
+    for item in meta_dict:
+        for col in [Column.actors, Column.genres, Column.keywords, Column.directors]:
+            item[col.value] = eval(item[col.value])
+
     add_poster_urls(meta_dict)
 
     return meta_dict
@@ -96,6 +100,7 @@ def avg_rating_for_user(user_id: int) -> float:
 
 @functools.lru_cache()
 def actors_as_lists():
+    # since eval (convert string representation to object) is costly time-wise, cache results
     return Data.movie_meta()[Column.actors.value].map(eval)
 
 
@@ -111,7 +116,11 @@ def get_genre_as_lists():
 
 @functools.lru_cache()
 def get_normalized_popularity():
+    # used for popularity bias
     popularity = Data.movie_meta()[Column.num_ratings.value]
+    # apply root reduce linearity
+    # (if movie A has double the ratings of movie B, its popularity should only be slightly higher)
     popularity **= (1 / 10)
+    # normalize
     popularity /= popularity.max()
     return popularity

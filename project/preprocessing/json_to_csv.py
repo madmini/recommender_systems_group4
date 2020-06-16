@@ -1,3 +1,8 @@
+""" pre-processing step to compile the .json files into one CSV.
+
+depending on the value of DROP_LONG_VALUES, some fields that we deem unnecessary will be dropped
+"""
+
 import os
 from typing import List, Dict
 

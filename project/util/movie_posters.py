@@ -95,6 +95,7 @@ class Poster:
         if len(j['posters']) == 0:
             return ''
 
+        # prefer posters in known language: english > german > no assigned language (no text on poster)
         poster = None
         for lang in ['en', 'de', None]:
             try:
@@ -103,9 +104,11 @@ class Poster:
             except StopIteration:
                 pass
 
+        # if none of preferred languages are available, just pick first poster
         if poster is None:
             poster = j['posters'][0]
 
+        # assemble poster url from parts
         poster_url = str(cls._tmdb_api_conf['images']['base_url']) + str(poster_size) + str(poster['file_path'])
 
         return poster_url

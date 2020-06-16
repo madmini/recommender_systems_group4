@@ -11,17 +11,30 @@
                 <h1 class="display-4 title hero-movie-info-title">
                     {{ movie.title }}
                     <small class="hero-movie-info-subtitle">({{ movie.release_year }})</small>
+                    <div class="h6 mt-3">
+                        <a target="_blank" rel="noopener noreferrer"
+                           href="https://www.themoviedb.org/movie/{{ movie.tmdb_id }}">
+                            <i class="fa fa-external-link" aria-hidden="true"></i> TMDb
+                        </a>
+                        <a target="_blank" rel="noopener noreferrer"
+                           href="https://www.imdb.com/title/tt{{ movie.imdb_id }}">
+                            <i class="fa fa-external-link" aria-hidden="true"></i> IMDb
+                        </a>
+                    </div>
                 </h1>
                 <div class="hero-movie-info-body limited-field">
                     <p class="lead hero-movie-info-summary">
                         {{ movie.summary }}
                     </p>
                     <hr class="my-4">
-                    <p class="lead">{{ movie.genres }}</p>
+                    <p class="lead"><i>Genres:</i> {{ movie.genres|join:', ' }}</p>
+                    <p class="lead"><i>Keywords:</i> {{ movie.tmdb_keywords|join:', ' }}</p>
+                    <p class="lead"><i>Directors:</i> {{ movie.directors|join:', ' }}</p>
+                    <p class="lead"><i>Actors:</i> {{ movie.actors|join:', ' }}</p>
                 </div>
                 <div class="lead mt-4 mb-2">
-                    <a class="btn btn-primary btn-lg{% if active and mode == 'recommend' %} disabled{% endif %}" role="button"
-                       href="{% url 'recommend_default' movie_id=movie.movielens_id %}">
+                    <a class="btn btn-primary btn-lg{% if active and mode == 'recommend' %} disabled{% endif %}"
+                       role="button" href="{% url 'recommend_default' movie_id=movie.movielens_id %}">
                         {% if active and mode == 'recommend' %}
                             Choose from recommendations
                         {% else %}

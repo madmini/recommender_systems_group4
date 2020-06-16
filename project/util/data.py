@@ -9,6 +9,7 @@ from typing import List, Dict, Union
 
 import pandas as pd
 
+from util.exception import MissingDataException
 from util.synchronized import synchronized
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -67,7 +68,7 @@ class File(Enum):
     # tags.csv: userId, movieId, tag, timestamp
     tags = ('tags', [Column.user_id.value, Column.movie_id.value, Column.tag.value, Column.timestamp.value], None)
     # links.csv: movieId,imdbId,tmdbId
-    links = ('links', [Column.movie_id.value, Column.imdb_id.value, Column.tmdb_id.value], None)
+    # links = ('links', [Column.movie_id.value, Column.imdb_id.value, Column.tmdb_id.value], None)
     movie_meta = (
         'movie_meta',
         [Column.movie_id.value, 'tmdb_original_language', Column.keywords.value, 'tmdb_video',
@@ -105,6 +106,10 @@ class File(Enum):
     def __str__(self):
         return self.filename
 
+    @classmethod
+    def required(cls):
+        return [cls.ratings]
+
 
 class Data:
     __ml_path: str = None
@@ -118,6 +123,7 @@ class Data:
 
         max_size = 0
 
+        # check if provided path exists, and if relative, make absolute
         if ml_path is not None:
             if os.path.exists(ml_path):
                 cls.__ml_path = ml_path
@@ -133,20 +139,32 @@ class Data:
         cls.__file_paths = dict()
         cls.__cache = dict()
 
+        # if no path was provided, find best ml dataset
         if cls.__ml_path is None:
             files: Dict[str, str] = None
 
+            # for each ml-* dataset
             for name in os.listdir(dataset_dir):
                 if not name.startswith('ml-'):
                     continue
 
                 current_ml_path: str = os.path.join(dataset_dir, name)
 
+                # put datafiles into a dictionary so they can be loaded later on
                 current_files: Dict[str, str] = {file.split('.')[0]: file for file in os.listdir(current_ml_path)}
 
-                if File.ratings.filename not in current_files or File.movies.filename not in current_files:
+                # check for the minimum required files
+                required_files_missing = False
+                for f in File.required():
+                    if f.filename not in current_files:
+                        required_files_missing = True
+                        break
+
+                # ignore dataset if those are missing
+                if required_files_missing:
                     continue
 
+                # per default, accept dataset with largest ratings file (~biggest dataset)
                 ratings_size: int = os.path.getsize(os.path.join(current_ml_path, current_files[File.ratings.filename]))
                 if ratings_size > max_size:
                     cls.__ml_path = current_ml_path
@@ -154,6 +172,7 @@ class Data:
                     files = current_files
 
         else:
+            # put datafiles into a dictionary so they can be loaded later on
             files = {file.split('.')[0]: file for file in os.listdir(cls.__ml_path)}
 
         if cls.__ml_path is None or files is None:
@@ -161,6 +180,7 @@ class Data:
         else:
             lookup_files = {file.filename: file for file in File}
 
+            # look through discovered files, save any fitting ones
             for name in files:
 
                 full_name = files[name]
@@ -171,14 +191,17 @@ class Data:
 
         # print("using " + str(cls.__ml_path))
 
+        # load movie_meta (metadata provided with assignment)
         for name in os.listdir(meta_dataset_dir):
             if name.startswith('movie_meta.csv'):
                 cls.__file_paths[File.movie_meta] = os.path.join(meta_dataset_dir, name)
+                # if multiple ones are available, choose the one that is not compressed,
+                # as this will result in slightly lower load times
                 if not name.endswith(('.xz', '.gz', '.zip', '.bz2')):
                     break
 
+        # preload files if specified, load on demand otherwise
         if preload_files:
-            cls.movies()
             cls.ratings()
             cls.movie_meta()
 
@@ -198,7 +221,7 @@ class Data:
         file = File.movies
 
         if file not in cls.__file_paths:
-            return None
+            raise MissingDataException('The "movies" data file could not be found.')
 
         path = cls.__file_paths[file]
 
@@ -235,6 +258,7 @@ class Data:
         if file not in cls.__cache:
             path = cls.__file_paths[file]
 
+            # differentiate between .dat (::-separated) and .csv (,-separated)
             if '.dat' in path:
                 # this method is faster than the more obvious alternatives
                 #   assign single ':' as the separator, then ignore odd columns with usecols=<even numbers>
@@ -281,18 +305,8 @@ class Data:
                 path, index_col=0, engine='c', names=file.header, header=0,
                 dtype=file.dtypes, parse_dates=[Column.release_date.value]
             )
-            # cls.__cache[file].rename_axis('movieId', inplace=True)
 
         return cls.__cache[file]
-
-    @classmethod
-    def load(cls, f: File):
-        if f == File.ratings:
-            cls.ratings()
-        elif f == File.movies:
-            cls.movies()
-        elif f == File.movie_meta:
-            cls.movie_meta()
 
     @classmethod
     def tag_genome(cls) -> pd.Series:
@@ -308,7 +322,10 @@ class Data:
 
         if file not in cls.__cache:
             df = pd.read_csv(path, engine='c', names=file.header, header=0, dtype=file.dtypes)
+            # has multi-index
             df.set_index(keys=file.index, inplace=True)
+            # since this datafile is 100% dense (for every movie and every tag there is a value)
+            # create the pivot_table by default (even uses less memory)
             pt = pd.pivot_table(df, index=Column.movie_id.value, columns=Column.tag_id.value)
             cls.__cache[file] = pt
 
