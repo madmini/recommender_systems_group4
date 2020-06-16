@@ -4,7 +4,12 @@
 
         {#        <div class="navbar-brand">#}
 
-        {% if mode == 'search' %}
+        {% if something_went_wrong %}
+            <div class="col-12 col-md-auto h5 my-4">
+                Something went wrong
+            </div>
+
+        {% elif mode == 'search' %}
             <div class="col-12 col-md-auto h5 my-4">
                 Search results for <span class=""><i><b>{{ search_query }}</b></i></span>
             </div>

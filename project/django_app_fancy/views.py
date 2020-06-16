@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect
 
-# Create your views here.
 from recommendations.adapter import recommend_movies, get_methods
 from recommendations.method import Method
+from util.exception import MovieNotFoundException, MethodNotFoundException, MissingDataException
 from util.search import Search
 
 
@@ -22,7 +22,24 @@ def recommend(request, movie_id: int, method_name: str = None):
 
         return redirect('recommend', movie_id=movie_id, method_name=method_name)
 
-    movies = recommend_movies(movie_id=movie_id, n=5, method_name=method_name)
+    try:
+        movies = recommend_movies(movie_id=movie_id, n=5, method_name=method_name)
+
+    except MovieNotFoundException:
+        return render(request, 'movie/error.html',
+                      context={'something_went_wrong': True, 'dark_theme': True, 'load_static': True,
+                               'methods': get_methods(method_name),
+                               'err_msg': 'We do not have data on a movie with ID %s.' % movie_id})
+
+    except MethodNotFoundException:
+        return render(request, 'movie/error.html',
+                      context={'something_went_wrong': True, 'dark_theme': True, 'load_static': True,
+                               'methods': get_methods(method_name), 'err_msg': 'There is no method %s.' % method_name})
+
+    except MissingDataException as e:
+        return render(request, 'movie/error.html',
+                      context={'something_went_wrong': True, 'dark_theme': True, 'load_static': True,
+                               'methods': get_methods(method_name), 'err_msg': 'Missing data: %s' % e.args[0]})
 
     return render(request, 'movie/recommendations.html', context={
         'mode': 'recommend',

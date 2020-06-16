@@ -1,0 +1,18 @@
+{% extends 'movie/base.html' %}
+
+{% block title %}
+    Something went wrong
+{% endblock %}
+
+{% block header %}
+    {% include 'movie/header.html' with methods=methods %}
+{% endblock %}
+
+{% block content %}
+    <div class="jumbotron">
+        <p class="lead">
+            {{ err_msg }}
+        </p>
+    </div>
+
+{% endblock %}

@@ -4,12 +4,16 @@ from pandas import Series
 
 from recommendations.filters.history import History
 from recommendations.method import Method
+from util.data import Data
 from util.data_helper import get_movie_meta_for
-from util.exception import MethodNotFoundException
+from util.exception import MethodNotFoundException, MovieNotFoundException
 
 
 # @functools.lru_cache(maxsize=None, typed=False)
 def _recommend_movies(movie_id: int, n: int, method: Method) -> List[Dict]:
+    if movie_id not in Data.movie_meta().index:
+        raise MovieNotFoundException
+
     # start with the movie itself
     movies: List[int] = [movie_id]
 
