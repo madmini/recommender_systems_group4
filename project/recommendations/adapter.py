@@ -1,3 +1,4 @@
+import functools
 from typing import List, Dict
 
 from pandas import Series
@@ -9,7 +10,7 @@ from util.data_helper import get_movie_meta_for
 from util.exception import MethodNotFoundException, MovieNotFoundException
 
 
-# @functools.lru_cache(maxsize=None, typed=False)
+@functools.lru_cache(maxsize=None, typed=False)
 def _recommend_movies(movie_id: int, n: int, method: Method) -> List[Dict]:
     if movie_id not in Data.movie_meta().index:
         raise MovieNotFoundException
