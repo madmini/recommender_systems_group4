@@ -2,7 +2,34 @@
 
 _Note: this file probably looks best in the github.com markdown viewer, which is the recommended viewing platform._
 
-[[_TOC_]]
+Table of Contents
+=================
+   * [Assignment 7 / Project](#assignment-7--project)
+      * [Installation](#installation)
+         * [Fetch project files](#fetch-project-files)
+         * [(Optionally) create virtual environment](#optionally-create-virtual-environment)
+            * [Windows](#windows)
+            * [Unix/macOS](#unixmacos)
+         * [Install required python packages](#install-required-python-packages)
+         * [(Optionally) add TMDb API-Key](#optionally-add-tmdb-api-key)
+         * [(Optionally) add a bigger dataset](#optionally-add-a-bigger-dataset)
+         * [Launch server](#launch-server)
+      * [Structure](#structure)
+         * [Functional](#functional)
+            * [Recommendation Strategies](#recommendation-strategies)
+               * [Metrics/Scores](#metricsscores)
+                  * [Dummy strategies](#dummy-strategies)
+               * [Meta-Strategies](#meta-strategies)
+            * [Utilities](#utilities)
+            * [Pre-processing](#pre-processing)
+         * [Assets](#assets)
+         * [User Interface](#user-interface)
+            * [Django project](#django-project)
+            * [Fancy App](#fancy-app)
+               * [Logic](#logic)
+               * [Templates (HTML code)](#templates-html-code)
+            * [Old App](#old-app)
+<!-- toc generated using https://github.com/ekalinin/github-markdown-toc -->
 
 ## Installation
 
