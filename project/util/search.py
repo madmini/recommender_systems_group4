@@ -12,7 +12,7 @@ from whoosh.query import Query
 from whoosh.searching import Results
 
 from util.data import Data, Column
-from util.data_helper import add_poster_urls
+from util.data_helper import get_movie_meta_for
 
 
 class Search:
@@ -80,7 +80,7 @@ class Search:
         iw.commit(optimize=True)
 
     @classmethod
-    def _search(cls, query_text: str, n: int):
+    def _search(cls, query_text: str, n: int) -> Dict:
         if cls.ix is None:
             cls.init()
         if cls.ix.is_empty():
@@ -120,6 +120,7 @@ class Search:
         # as they need to be resorted, more search terms should be provided than necessary,
         # to be able to recover popular results that have rather low scores
         results = cls._search(query_text, n + 25)
+
         # encapsulate in pandas.Series for further operations
         scores = pd.Series(results, name='score')
         # perform a (right outer) join to connect the search results to the metadata
@@ -129,11 +130,9 @@ class Search:
         # and multiply with the number of ratings (the popularity)
         df.eval(f'weighted = score**16 * {Column.num_ratings.value}', inplace=True)
 
-        # extract the n best results and export as dictionary
-        d = df.nlargest(n, 'weighted').to_dict(orient='records')
+        # extract the n best results and export as list
+        movie_ids = list(df.nlargest(n, 'weighted').index)
+        # fetch metadata
+        meta = get_movie_meta_for(movie_ids)
 
-        if add_posters:
-            # add poster urls to the dictionary
-            add_poster_urls(d)
-
-        return d
+        return meta

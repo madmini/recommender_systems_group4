@@ -28,7 +28,8 @@ def get_movie_meta_for(movie_ids: List[int]) -> List[Dict]:
 
     for item in meta_dict:
         for col in [Column.actors, Column.genres, Column.keywords, Column.directors]:
-            item[col.value] = eval(item[col.value])
+            if not pd.isnull(item[col.value]):
+                item[col.value] = eval(item[col.value])
 
     add_poster_urls(meta_dict)
 

@@ -32,13 +32,14 @@ class Poster:
         if api_key_file_path is None:
             api_key_file_path = os.path.join(settings.BASE_DIR, 'util', api_keys_filename)
 
-        j: Dict
-        with open(api_key_file_path, encoding='utf8') as f:
-            j = simplejson.load(f, encoding='utf8')
+        if os.path.exists(api_key_file_path):
+            j: Dict
+            with open(api_key_file_path, encoding='utf8') as f:
+                j = simplejson.load(f, encoding='utf8')
 
-        for api_key in api_key_names:
-            if api_key_names[api_key] in j:
-                cls._api_keys[api_key] = j[api_key_names[api_key]]
+            for api_key in api_key_names:
+                if api_key_names[api_key] in j:
+                    cls._api_keys[api_key] = j[api_key_names[api_key]]
 
         if update_tmdb_config:
             r = requests.get(
@@ -71,17 +72,28 @@ class Poster:
             return 0
 
     @classmethod
+    def _get_api_key(cls, name: str):
+        if name not in cls._api_keys:
+            cls.init()
+        if name not in cls._api_keys:
+            return None
+
+        return cls._api_keys[name]
+
+    @classmethod
     @functools.lru_cache(maxsize=None, typed=False)
     def get_poster_tmdb(cls, tmdb_movie_id: int, poster_size: str = None) -> str:
         if poster_size is None:
             poster_size = cls._poster_size
-        if 'tmdb_v3' not in cls._api_keys:
-            cls.init()
+
+        api_key = cls._get_api_key('tmdb_v3')
+        if api_key is None:
+            return ''
 
         r = requests.get(
             'https://api.themoviedb.org/3/movie/%s/images' % tmdb_movie_id,
             params={
-                'api_key': cls._api_keys['tmdb_v3'],
+                'api_key': api_key,
                 # 'include_image_language': 'en,null'
             },
         )
@@ -122,13 +134,14 @@ class Poster:
 
     @classmethod
     def request_tmdb_api_v4(cls):
-        if 'tmdb_v4' not in cls._api_keys:
-            cls.init()
+        api_key = cls._get_api_key('tmdb_v4')
+        if api_key is None:
+            return ''
 
         r = requests.get(
             'https://api.themoviedb.org/4/list/1',
             headers={
-                'Authorization': 'Bearer %s' % cls._api_keys['tmdb_v4'],
+                'Authorization': f'Bearer {api_key}',
                 'Content-Type': 'application/json;charset=utf-8'
             }
         )
@@ -140,14 +153,15 @@ class Poster:
 
     @classmethod
     def get_poster_omdb_imdb(cls, imdb_movie_id: str = None) -> str:
-        if 'omdb' not in cls._api_keys:
-            cls.init()
+        api_key = cls._get_api_key('omdb')
+        if api_key is None:
+            return ''
 
         r = requests.get(
             'http://www.omdbapi.com/',
             params={
                 'i': imdb_movie_id if imdb_movie_id.startswith('tt') else 'tt' + imdb_movie_id,
-                'apikey': cls._api_keys['omdb']
+                'apikey': api_key
             }
         )
 
@@ -164,8 +178,3 @@ class Poster:
 
         imdb_movie_id = Data.movie_meta().at[movielens_id, Column.imdb_id.value]
         return cls.get_poster_omdb_imdb(imdb_movie_id=imdb_movie_id)
-
-
-if __name__ == '__main__':
-    Poster.init('apikeys.secret.json')
-    print(Poster.get_poster_tmdb_ml(1))

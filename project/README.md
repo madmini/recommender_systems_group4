@@ -33,29 +33,34 @@ Table of Contents
 
 ## Installation
 
+On some OS-distributions, `python` still points to `python2.7` for compatibility.
+If this is the case, use the `python3` command instead of `python` in the following commands.
+
 ### Fetch project files
 ```shell script
-git clone 
+git clone https://github.com/madmini/recommender_systems_group4.git
 cd recommender_systems_group4/project
 ```
 
 ### (Optionally) create virtual environment
+Setting up a `venv` may prevent landing in package hell. 
+It will also make sure that `python` uses the correct version.
 
 #### Windows
 ```shell script
-python3 -m venv venv
+python -m venv venv
 venv\Scripts\activate.bat
 ```
 
 #### Unix/macOS
 ```shell script
-python3 -m venv venv
+python -m venv venv
 source venv/bin/activate
 ```
 
 ### Install required python packages
 ```shell script
-python3 -m pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ### (Optionally) add TMDb API-Key
@@ -70,7 +75,7 @@ More explicit instructions are found in the [datasets readme]( datasets/README_D
 
 ### Launch server
 ```shell script
-python3 manage.py runserver
+python manage.py runserver
 ```
 Note that the first launch may take a longer time as pre-processing (amongst others, building the full text search index) will take place. 
 
