@@ -73,6 +73,11 @@ you may want to add a bigger dataset (e.g. `ml-25m`) to `datasets/`.
 
 More explicit instructions are found in the [datasets readme]( datasets/README_DATASETS.md ).
 
+### Run migrations
+```shell script
+python manage.py migrate
+```
+
 ### Launch server
 ```shell script
 python manage.py runserver
