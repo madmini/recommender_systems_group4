@@ -14,6 +14,8 @@ def get_movie_meta_for(movie_ids: List[int]) -> List[Dict]:
     if isinstance(movie_ids, int):
         movie_ids = [movie_ids]
 
+    movie_ids = filter(lambda x: x is not None, movie_ids)
+
     meta: pd.DataFrame = Data.movie_meta()
 
     try:

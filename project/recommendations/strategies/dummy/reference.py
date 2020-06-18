@@ -13,4 +13,4 @@ def tmdb_reference(movie_id: int, n: int = 5):
     similar = map(lambda tmdb_id: get_movielens_id(tmdb_id=tmdb_id), similar_tmdb)
 
     # return with artificial decreasing score
-    return pd.Series({item: -index for index, item in enumerate(similar)})
+    return pd.Series({item: -index for index, item in enumerate(similar) if item is not None})
