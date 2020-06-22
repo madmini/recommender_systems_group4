@@ -49,8 +49,16 @@ After the calculations each movie has a score between 0 and 100 and the five hig
 \subsubsection{First direct sequel + co}
 This method reserves the first recommendation "slot" for direct sequels. If there is no direct sequel, the first slot will be reassigned to the second part. The other slots follow a similar strategy as the \emph{Meta-mix}, combining user-based similarity, common actors, common directors and genre similarity with weights 2, 1, 1 and 3 respectively.
 \subsubsection{Mixed Algorithms}
-\subsubsection{Mixed Algorithms with popularity bias}
+The principle is the same as with the Meta-mix, but this approach is focused on creating an extendable, adaptable version of it.There is an adapter method, that can use multiple different recommender systems, assigning them a weight and then calculating the score accordingly.
+The "recommender systems" used for this approach are all column based. That means there is an algorithm for every column of data used. The implementation of those algorithms is fit to the specific columns. For example the keywords similiarity is based on machine learning (2.2.2) and the year is based on a simple arithmethic distance.
 
+For the evaluation we used every column (Keywords, summary, genre, actor, director, year). Keywords were assigned the highest weight, to create a different algorithm than the Meta-mix.
+\subsubsection{Mixed Algorithms with popularity bias}
+This step basically only adds a consideration for the popularity to the mixed algorithm.
+
+The default formula for the final score is: score ^ 1 * popularity
+
+In the implementation it is possible to change the "1" to a different number, to keep the adaptable nature of the mixed algorithms.
 \subsection{Evaluation}
 For the evaluation, we used 22 different movies such as Star Wars, Toy Story or Pirates of the Caribbean.
 We selected these movies with the goal of being as diverse as possible with regards to genres, popularity and overall setting.
