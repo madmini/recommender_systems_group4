@@ -56,9 +56,9 @@ For the evaluation we used every column (Keywords, summary, genre, actor, direct
 \subsubsection{Mixed Algorithms with popularity bias}
 This step basically only adds a consideration for the popularity to the mixed algorithm.
 
-The default formula for the final score is: score ^ 1 * popularity
+The default formula for the final score is: score * popularity
 
-In the implementation it is possible to change the "1" to a different number, to keep the adaptable nature of the mixed algorithms.
+In the implementation the formula is: score $^{x}$ * popularity,  where x is changeable, to keep the algorithm adaptable.
 \subsection{Evaluation}
 For the evaluation, we used 22 different movies such as Star Wars, Toy Story or Pirates of the Caribbean.
 We selected these movies with the goal of being as diverse as possible with regards to genres, popularity and overall setting.
